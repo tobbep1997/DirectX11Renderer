@@ -1,6 +1,7 @@
-#include "Window\Window.h"
+#include "Window/Window.h"
 #include "Graphics/Quad.h"
-#include "Camera\Camera.h"
+#include "Camera/Camera.h"
+#include "Light/Light.h"
 
 #if _DEBUG
 #include <iostream>
@@ -31,19 +32,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	Camera camera;
 	camera.Init();
-	camera.SetPosition(XMFLOAT4A(0, 0, 0, 1));
+	camera.SetPosition(XMFLOAT4A(0, 0, 3, 1));
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
+	
 	//XMFLOAT4X4A test = camera.GetViewMatrix();
+	Light * light = new Light();
+	
 	Quad * draw = new Quad();
 	draw->SetPosition(0, 0, 5);
 	while (wnd.isOpen())
 	{
 		wnd.PollEvents();
 		wnd.Clear(); 
-		draw->SetRotation(0, draw->GetRotation().y + .01, 0);
+		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
 		draw->Draw();
+		light->Draw();
 		wnd.Flush(&camera);
 	}
+	delete light;
 	delete draw;
 	//delete wnd;
 	return 0;

@@ -18,7 +18,12 @@ struct VS_OUTPUT
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
 };
-float4 main( VS_INPUT input ) : SV_POSITION
+VS_OUTPUT main( VS_INPUT input )
 {
-    return mul(input.pos, mul(worldMatrix, viewProjection));
+    VS_OUTPUT o;
+    o.pos = mul(input.pos, mul(worldMatrix, viewProjection));
+    o.worldPos = mul(input.pos, worldMatrix);
+    o.normal = mul(float4(input.normal, 0), worldMatrix).xyz;
+    o.uv = input.uv;
+    return o;
 }

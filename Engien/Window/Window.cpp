@@ -4,7 +4,8 @@
 ID3D11Device*			DX::g_device;
 ID3D11DeviceContext*	DX::g_deviceContext;
 
-std::queue<Drawable*> DX::geometry;
+std::queue<Drawable*>	DX::geometry;
+std::vector	<Light*>	DX::lights;
 
 void DX::safeRelease(IUnknown * u)
 {
@@ -159,6 +160,25 @@ void Window::_createBuffers()
 
 	HRESULT hr = DX::g_device->CreateBuffer(&vertexConstant, nullptr, &m_constantBuffer);
 
+	D3D11_BUFFER_DESC lightConstant;
+	lightConstant.Usage = D3D11_USAGE_DYNAMIC;
+	lightConstant.ByteWidth = sizeof(LIGHT_BUFFER);
+	lightConstant.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightConstant.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightConstant.MiscFlags = 0;
+	lightConstant.StructureByteStride = 0;
+
+	hr = DX::g_device->CreateBuffer(&lightConstant, nullptr, &this->m_lightBuffer);
+	D3D11_BUFFER_DESC cameraBuffer;
+	cameraBuffer.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBuffer.ByteWidth = sizeof(CAMERA_BUFFER);
+	cameraBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBuffer.MiscFlags = 0;
+	cameraBuffer.StructureByteStride = 0;
+
+	hr = DX::g_device->CreateBuffer(&cameraBuffer, nullptr, &this->m_cameraBuffer);
+
 }
 
 void Window::_createShaders()
@@ -217,7 +237,20 @@ void Window::_present(int sync)
 	m_swapChain->Present(0, 0);
 }
 
-void Window::_geometry(Camera * camera)
+void Window::_mapBuffers(Camera * camera)
+{
+	D3D11_MAPPED_SUBRESOURCE dataPtr;
+
+	CAMERA_BUFFER camBuff;
+	camBuff.position = camera->GetPosition();
+	DX::g_deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+	memcpy(dataPtr.pData, &camBuff, sizeof(CAMERA_BUFFER));
+	DX::g_deviceContext->Unmap(m_cameraBuffer, 0);
+
+	DX::g_deviceContext->PSSetConstantBuffers(1, 1, &m_cameraBuffer);
+}
+
+void Window::_geometryPass(Camera * camera)
 {
 	UINT32 vertexSize = sizeof(VERTEX);
 	UINT32 offset = 0;
@@ -227,11 +260,15 @@ void Window::_geometry(Camera * camera)
 	VERTEX_BUFFER V_Buffer;
 
 	if (camera)
+	{
 		V_Buffer.viewProjection = camera->GetViewProjectionMatrix();
-	else
+	}
+	else {
 		V_Buffer.viewProjection = DirectX::XMFLOAT4X4A();
+	}
 
 
+	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	while (!DX::geometry.empty())
 	{
 		vertexBuffer = DX::geometry.front()->getVertexBuffer();
@@ -239,7 +276,6 @@ void Window::_geometry(Camera * camera)
 
 		V_Buffer.worldMatrix = DX::geometry.front()->getWorldMatrix();
 
-		D3D11_MAPPED_SUBRESOURCE dataPtr;
 		DX::g_deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
 		memcpy(dataPtr.pData, &V_Buffer, sizeof(VERTEX_BUFFER));
 		DX::g_deviceContext->Unmap(m_constantBuffer, 0);
@@ -251,6 +287,25 @@ void Window::_geometry(Camera * camera)
 		DX::geometry.pop();
 	}
 	
+
+}
+
+void Window::_lightPass()
+{
+	LIGHT_BUFFER light_buffer;
+	for (size_t i = 0; i < DX::lights.size(); i++)
+	{
+		light_buffer.info[i] = XMINT4(DX::lights[i]->GetInfo(),0,0,0);
+		light_buffer.position[i] = DX::lights[i]->GetPosition();
+		light_buffer.direction[i] = DX::lights[i]->GetDirection();
+		light_buffer.color[i] = DX::lights[i]->GetColor();
+	}
+	D3D11_MAPPED_SUBRESOURCE dataPtr;
+	DX::g_deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+	memcpy(dataPtr.pData, &light_buffer, sizeof(LIGHT_BUFFER));
+	DX::g_deviceContext->Unmap(m_lightBuffer, 0);
+
+	DX::g_deviceContext->PSSetConstantBuffers(0, 1, &m_lightBuffer);
 }
 
 void Window::_releaseIUnknown()
@@ -266,6 +321,9 @@ void Window::_releaseIUnknown()
 	DX::safeRelease(m_pixelShader);
 
 	DX::safeRelease(m_constantBuffer);
+	DX::safeRelease(m_lightBuffer);
+	DX::safeRelease(m_cameraBuffer);
+
 
 	DX::safeRelease(DX::g_deviceContext);
 	DX::safeRelease(DX::g_device);
@@ -378,10 +436,15 @@ void Window::Clear()
 	DX::g_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	DX::g_deviceContext->OMSetBlendState(nullptr, 0, 0xffffffff);
 
+	DX::lights.clear();
+
 }
 
 void Window::Flush(Camera * camera)
 {
-	this->_geometry(camera);
+	if (camera)
+		this->_mapBuffers(camera);
+	this->_lightPass();
+	this->_geometryPass(camera);
 	this->_present();
 }

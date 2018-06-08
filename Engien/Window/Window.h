@@ -39,8 +39,9 @@ private:
 	ID3D11PixelShader*		m_pixelShader;
 
 	ID3D11Buffer*			m_constantBuffer;
+	ID3D11Buffer*			m_lightBuffer;
+	ID3D11Buffer*			m_cameraBuffer;
 
-	
 
 private:
 	bool _initWindow();
@@ -54,7 +55,10 @@ private:
 	void _createShaders();
 
 	void _present(int = 0);
-	void _geometry(Camera * camera = nullptr);
+	void _mapBuffers(Camera * camera);
+	void _geometryPass(Camera * camera = nullptr);
+
+	void _lightPass();
 
 	void _releaseIUnknown();
 

@@ -17,11 +17,15 @@ protected:
 	void _createViewMatrix();
 	void _createPerspectivProjectionMatrix(float fovRad = XM_PI / 2, float aspectRatio = 16.0f/9.0f, float nearPlane = 1.0f, float farPlane = 20.0f);
 	void _createViewProjectionMatrix();
+
 public:
 	Camera();
 	~Camera();
 
 	void Init(float fovRad = XM_PI / 2, float aspectRatio = 16.0f / 9.0f, float nearPlane = 1.0f, float farPlane = 20.0f);
+
+	void SetPosition(float x, float y, float z, float w = 1);
+	void SetDirection(float x, float y, float z, float w = 0);
 
 	void SetPosition(XMFLOAT4A position);
 	void SetDirection(XMFLOAT4A direction);
@@ -29,5 +33,7 @@ public:
 	XMFLOAT4X4A GetViewMatrix() const;
 	XMFLOAT4X4A GetProjectionMatrix() const;
 	XMFLOAT4X4A GetViewProjectionMatrix() const;
+
+	XMFLOAT4A	GetPosition() const;
 };
 

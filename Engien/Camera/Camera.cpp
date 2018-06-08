@@ -20,7 +20,7 @@ void Camera::_createViewProjectionMatrix()
 	XMMATRIX view = XMLoadFloat4x4A(&this->_viewMatrix);
 	XMMATRIX projection = XMLoadFloat4x4A(&this->_projectionMatrix);
 
-	XMStoreFloat4x4A(&this->_viewProjectionMatrix, view * projection);
+	XMStoreFloat4x4A(&this->_viewProjectionMatrix, projection * view);
 }
 
 Camera::Camera()
@@ -43,6 +43,16 @@ void Camera::Init(float fovRad, float aspectRatio, float nearPlane, float farPla
 
 }
 
+void Camera::SetPosition(float x, float y, float z, float w)
+{
+	this->SetPosition(XMFLOAT4A(x, y, z, w));
+}
+
+void Camera::SetDirection(float x, float y, float z, float w)
+{
+	this->SetDirection(XMFLOAT4A(x, y, z, w));
+}
+
 void Camera::SetPosition(XMFLOAT4A position)
 {
 	this->_position = position;
@@ -53,7 +63,7 @@ void Camera::SetPosition(XMFLOAT4A position)
 
 void Camera::SetDirection(XMFLOAT4A direction)
 {
-	this->_direction = direction;
+	XMStoreFloat4A(&this->_direction, XMVector4Normalize(XMLoadFloat4A(&direction)));
 	this->_createViewMatrix();
 	this->_createViewProjectionMatrix();
 
@@ -72,4 +82,9 @@ XMFLOAT4X4A Camera::GetProjectionMatrix() const
 XMFLOAT4X4A Camera::GetViewProjectionMatrix() const
 {
 	return this->_viewProjectionMatrix;
+}
+
+XMFLOAT4A Camera::GetPosition() const
+{
+	return this->_position;
 }
