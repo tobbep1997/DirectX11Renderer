@@ -6,6 +6,9 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 #include "Structs.h"
+#include "Creator.h"
+#include "../Camera/Camera.h"
+
 
 using namespace DirectX;
 
@@ -35,6 +38,10 @@ private:
 	ID3D11VertexShader*		m_vertexShader;
 	ID3D11PixelShader*		m_pixelShader;
 
+	ID3D11Buffer*			m_constantBuffer;
+
+	
+
 private:
 	bool _initWindow();
 	HRESULT _initDirect3DContext();
@@ -43,10 +50,13 @@ private:
 	void _initViewPort();
 	void _setViewport();
 
+	void _createBuffers();
 	void _createShaders();
 
 	void _present(int = 0);
-	void _geometry();
+	void _geometry(Camera * camera = nullptr);
+
+	void _releaseIUnknown();
 
 	static LRESULT CALLBACK StaticWndProc(HWND, UINT, WPARAM, LPARAM);
 	LRESULT WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -59,6 +69,6 @@ public:
 	bool isOpen();
 	void Clear();
 	
-	void Flush();
+	void Flush(Camera * camera = nullptr);
 };
 

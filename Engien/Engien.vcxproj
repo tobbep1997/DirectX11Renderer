@@ -115,13 +115,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Graphics\Drawable.h" />
+    <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\Quad.h" />
+    <ClInclude Include="Window\Creator.h" />
     <ClInclude Include="Window\Extern.h" />
     <ClInclude Include="Window\Structs.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Graphics\Drawable.cpp" />
+    <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\Quad.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>

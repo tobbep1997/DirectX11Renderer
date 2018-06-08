@@ -6,6 +6,13 @@ ID3D11DeviceContext*	DX::g_deviceContext;
 
 std::queue<Drawable*> DX::geometry;
 
+void DX::safeRelease(IUnknown * u)
+{
+	if (u)
+		u->Release();
+	u = NULL;
+}
+
 
 bool Window::_initWindow()
 {
@@ -140,6 +147,20 @@ void Window::_setViewport()
 	DX::g_deviceContext->RSSetViewports(1, &m_viewport);
 }
 
+void Window::_createBuffers()
+{
+	D3D11_BUFFER_DESC vertexConstant;
+	vertexConstant.Usage = D3D11_USAGE_DYNAMIC;
+	vertexConstant.ByteWidth = sizeof(VERTEX_BUFFER);
+	vertexConstant.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	vertexConstant.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexConstant.MiscFlags = 0;
+	vertexConstant.StructureByteStride = 0;
+
+	HRESULT hr = DX::g_device->CreateBuffer(&vertexConstant, nullptr, &m_constantBuffer);
+
+}
+
 void Window::_createShaders()
 {
 	ID3DBlob * pVS = nullptr;
@@ -196,20 +217,58 @@ void Window::_present(int sync)
 	m_swapChain->Present(0, 0);
 }
 
-void Window::_geometry()
+void Window::_geometry(Camera * camera)
 {
 	UINT32 vertexSize = sizeof(VERTEX);
 	UINT32 offset = 0;
 	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	ID3D11Buffer * vertexBuffer;
+	VERTEX_BUFFER V_Buffer;
+
+	if (camera)
+		V_Buffer.viewProjection = camera->GetViewProjectionMatrix();
+	else
+		V_Buffer.viewProjection = DirectX::XMFLOAT4X4A();
+
+
 	while (!DX::geometry.empty())
 	{
-		ID3D11Buffer * b = DX::geometry.front()->getVertexBuffer();
-		DX::g_deviceContext->IASetVertexBuffers(0, 1, &b, &vertexSize, &offset);
+		vertexBuffer = DX::geometry.front()->getVertexBuffer();
+		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
+
+		V_Buffer.worldMatrix = DX::geometry.front()->getWorldMatrix();
+
+		D3D11_MAPPED_SUBRESOURCE dataPtr;
+		DX::g_deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+		memcpy(dataPtr.pData, &V_Buffer, sizeof(VERTEX_BUFFER));
+		DX::g_deviceContext->Unmap(m_constantBuffer, 0);
+		
+		DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
+
 		DX::g_deviceContext->Draw(DX::geometry.front()->getVertexSize(), 0);
 
 		DX::geometry.pop();
 	}
+	
+}
+
+void Window::_releaseIUnknown()
+{
+	DX::safeRelease(m_swapChain);
+	DX::safeRelease(m_backBufferRTV);
+	DX::safeRelease(m_depthStencilView);
+	DX::safeRelease(m_depthBufferTex);
+	DX::safeRelease(m_samplerState);
+	DX::safeRelease(m_inputLayout);
+
+	DX::safeRelease(m_vertexShader);
+	DX::safeRelease(m_pixelShader);
+
+	DX::safeRelease(m_constantBuffer);
+
+	DX::safeRelease(DX::g_deviceContext);
+	DX::safeRelease(DX::g_device);
 }
 
 LRESULT Window::StaticWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -276,6 +335,7 @@ Window::Window(HINSTANCE h)
 
 Window::~Window()
 {
+	this->_releaseIUnknown();
 }
 
 bool Window::Init(int width, int height, LPCSTR title, BOOL fullscreen)
@@ -291,6 +351,7 @@ bool Window::Init(int width, int height, LPCSTR title, BOOL fullscreen)
 	_setViewport();
 
 	ShowWindow(m_hwnd, 10);
+	this->_createBuffers();
 	this->_createShaders();
 	return false;
 }
@@ -319,8 +380,8 @@ void Window::Clear()
 
 }
 
-void Window::Flush()
+void Window::Flush(Camera * camera)
 {
-	this->_geometry();
+	this->_geometry(camera);
 	this->_present();
 }
