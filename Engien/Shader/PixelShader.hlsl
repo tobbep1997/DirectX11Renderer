@@ -19,23 +19,27 @@ struct VS_OUTPUT
     float4 pos : SV_POSITION;
     float4 worldPos : POSITION;
     float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
+    float2 texCoord : TEXCOORD;
 };
 
 float4 main(VS_OUTPUT input) : SV_TARGET
 {
-    float4 color = txDiffuse.Sample(sampState, input.uv);
+    float4 color = txDiffuse.Sample(sampState, input.texCoord);
     float4 ambient = float4(0.1, 0.1, 0.1, 0.1) * color;
 
     float4 posToCam = cameraPosition - input.worldPos;
-    float4 posToLight;
-    float4 dif;
-    float4 spec = 0;
+    float4 posToLight = float4(0, 0, 0, 0);
+    float4 dif = float4(0, 0, 0, 1);
+    float4 spec = float4(0, 0, 0, 1);
+
     for (int i = 0; i < info[0].x; i++)
     {
         posToLight = position[i] - input.worldPos;
-        dif += l_color[i] * color * max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
-        spec += l_color[i] * max(pow(dot(input.normal, normalize(posToCam.xyz + posToLight.xyz)), 32), 0);
+        if (dot(input.normal, posToLight.xyz) > 0)
+        {
+            dif += saturate(l_color[i] * color) * max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
+            spec += saturate(l_color[i]) * max(pow(dot(input.normal, normalize(posToCam.xyz + posToLight.xyz)), 32), 0.0);
+        }
     }
 
 

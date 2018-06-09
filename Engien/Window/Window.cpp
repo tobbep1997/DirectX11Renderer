@@ -300,10 +300,17 @@ void Window::_lightPass()
 	LIGHT_BUFFER light_buffer;
 	for (size_t i = 0; i < DX::lights.size(); i++)
 	{
-		light_buffer.info[i] = XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(),0,0);
-		light_buffer.position[i] = DX::lights[i]->GetPosition();
+		light_buffer.info[i] =		XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(),0,0);
+		light_buffer.position[i] =	DX::lights[i]->GetPosition();
 		light_buffer.direction[i] = DX::lights[i]->GetDirection();
-		light_buffer.color[i] = DX::lights[i]->GetColor();
+		light_buffer.color[i] =		DX::lights[i]->GetColor();
+	}
+	for (size_t i = DX::lights.size(); i < 256; i++)
+	{
+		light_buffer.info[i] =		XMINT4(0, 0, 0, 0);
+		light_buffer.position[i] =	XMFLOAT4A(0, 0, 0, 0);
+		light_buffer.direction[i] = XMFLOAT4A(0, 0, 0, 0);
+		light_buffer.color[i] =		XMFLOAT4A(0, 0, 0, 0);
 	}
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	DX::g_deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);

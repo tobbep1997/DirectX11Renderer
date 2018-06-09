@@ -23,7 +23,9 @@ public:
 
 	void Draw();
 
-	void SetColor(float x, float y, float z, float w);
+	void SetPosition(float x, float y, float z, float w = 1);
+	void SetColor(float r, float g, float b, float a = 1);
+	void SetPosition(XMFLOAT4A position);
 	void SetColor(XMFLOAT4A color);
 
 	XMFLOAT4A GetPosition();

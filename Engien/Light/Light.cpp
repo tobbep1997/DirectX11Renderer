@@ -20,9 +20,19 @@ void Light::Draw()
 	DX::lights.push_back(this);
 }
 
+void Light::SetPosition(float x, float y, float z, float w)
+{
+	this->SetPosition(XMFLOAT4A(x, y, z, w));
+}
+
 void Light::SetColor(float x, float y, float z, float w)
 {
 	this->SetColor(XMFLOAT4A(x, y, z, w));
+}
+
+void Light::SetPosition(XMFLOAT4A position)
+{
+	this->_position = position;
 }
 
 void Light::SetColor(XMFLOAT4A color)
