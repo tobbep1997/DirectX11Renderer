@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "../Window/Structs.h"
+#include "Texture\Texture.h"
 
 using namespace DirectX;
 class Drawable
@@ -11,15 +12,14 @@ private:
 	DirectX::XMFLOAT4A	_position;
 	DirectX::XMFLOAT4A	_scale;
 	DirectX::XMFLOAT4A	_rotation;
-
 	DirectX::XMFLOAT4X4A _worldMatrix;
 
 	ID3D11Buffer *	_vertexBuffer;
-
 	UINT _meshSize;
 
-	void _buildMatrix();
+	Texture * _texture;
 
+	void _buildMatrix();
 protected:
 	void _createBuffer(VERTEX * V, const int& size);
 public:
@@ -38,11 +38,14 @@ public:
 	DirectX::XMFLOAT4A GetRotation() const;
 	DirectX::XMFLOAT4A GetScale() const;
 
+	void LoadTexture(const std::string& path);
 
 	ID3D11Buffer *	getVertexBuffer();
 	UINT			getVertexSize();
 
 	DirectX::XMFLOAT4X4A& getWorldMatrix();
+
+	Texture * GetTexture();
 };
 
 #endif

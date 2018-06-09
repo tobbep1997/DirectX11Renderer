@@ -1,9 +1,12 @@
+SamplerState sampState : register(s0);
+Texture2D txDiffuse : register(t0);
+
 cbuffer LIGHT_BUFFER : register(b0)
 {
     int4    info[256];
     float4  position[256];
     float4  direction[256];
-    float4  color[256];
+    float4  l_color[256];
 }
 
 cbuffer CAMERA_BUFFER : register(b1)
@@ -21,16 +24,20 @@ struct VS_OUTPUT
 
 float4 main(VS_OUTPUT input) : SV_TARGET
 {
-    float4 color = float4(1, 0, 0, 1);
+    float4 color = txDiffuse.Sample(sampState, input.uv);
     float4 ambient = float4(0.1, 0.1, 0.1, 0.1) * color;
 
-    float4 posToLight = position[0] - input.worldPos;
     float4 posToCam = cameraPosition - input.worldPos;
+    float4 posToLight;
+    float4 dif;
+    float4 spec = 0;
+    for (int i = 0; i < info[0].x; i++)
+    {
+        posToLight = position[i] - input.worldPos;
+        dif += l_color[i] * color * max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
+        spec += l_color[i] * max(pow(dot(input.normal, normalize(posToCam.xyz + posToLight.xyz)), 32), 0);
+    }
 
-    float dif = max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
 
-    float spec = max(pow(dot(input.normal, normalize(posToCam.xyz + posToLight.xyz)), 512), 0);
-
-
-    return min(ambient + spec + (color * dif), float4(1,1,1,1));
+    return saturate(ambient + spec + dif);
 }

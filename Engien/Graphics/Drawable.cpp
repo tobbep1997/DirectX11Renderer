@@ -33,11 +33,13 @@ Drawable::Drawable()
 	this->_scale	= XMFLOAT4A(1, 1, 1, 1);
 	this->_rotation	= XMFLOAT4A(0, 0, 0, 1);
 	this->_buildMatrix();
+	this->_texture = new Texture();
 }
 
 Drawable::~Drawable()
 {
 	DX::safeRelease(this->_vertexBuffer);
+	delete this->_texture;
 }
 
 void Drawable::Draw()
@@ -93,6 +95,11 @@ DirectX::XMFLOAT4A Drawable::GetScale() const
 	return this->_scale;
 }
 
+void Drawable::LoadTexture(const std::string & path)
+{
+	this->_texture->LoadTexture(path);
+}
+
 ID3D11Buffer * Drawable::getVertexBuffer()
 {
 	return this->_vertexBuffer;
@@ -106,4 +113,9 @@ UINT Drawable::getVertexSize()
 DirectX::XMFLOAT4X4A& Drawable::getWorldMatrix()
 {
 	return this->_worldMatrix;
+}
+
+Texture * Drawable::GetTexture()
+{
+	return this->_texture;
 }

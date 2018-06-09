@@ -281,6 +281,11 @@ void Window::_geometryPass(Camera * camera)
 		DX::g_deviceContext->Unmap(m_constantBuffer, 0);
 		
 		DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
+		ID3D11SamplerState * ss = DX::geometry.front()->GetTexture()->GetSamplerState();
+		ID3D11ShaderResourceView * srv = DX::geometry.front()->GetTexture()->GetShaderResourceView();
+
+		DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
+		DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
 
 		DX::g_deviceContext->Draw(DX::geometry.front()->getVertexSize(), 0);
 
@@ -295,7 +300,7 @@ void Window::_lightPass()
 	LIGHT_BUFFER light_buffer;
 	for (size_t i = 0; i < DX::lights.size(); i++)
 	{
-		light_buffer.info[i] = XMINT4(DX::lights[i]->GetInfo(),0,0,0);
+		light_buffer.info[i] = XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(),0,0);
 		light_buffer.position[i] = DX::lights[i]->GetPosition();
 		light_buffer.direction[i] = DX::lights[i]->GetDirection();
 		light_buffer.color[i] = DX::lights[i]->GetColor();

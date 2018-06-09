@@ -37,8 +37,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	
 	//XMFLOAT4X4A test = camera.GetViewMatrix();
 	Light * light = new Light();
-	
+	light->SetColor(1, 1, 0, 1);
 	Quad * draw = new Quad();
+	draw->LoadTexture("Texture/grass2.jpg");
 	draw->SetPosition(0, 0, 5);
 	while (wnd.isOpen())
 	{
