@@ -46,7 +46,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	light3->SetColor(0, 1, 0);
 	light3->SetPosition(0, 0, 0);
 	Quad * draw = new Quad();
-	draw->SetColor(1, 1, 1, 1);
 	draw->LoadTexture("Texture/grass2.jpg");
 	draw->SetPosition(0, 0, 5);
 	while (wnd.isOpen())
