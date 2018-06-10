@@ -2,6 +2,18 @@
 #include <DirectXMath.h>
 struct VERTEX 
 {
+	VERTEX()
+	{
+		this->pos = DirectX::XMFLOAT4();
+		this->normal = DirectX::XMFLOAT3();
+		this->uv = DirectX::XMFLOAT2();
+	}
+	VERTEX(DirectX::XMFLOAT4 pos, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT2 uv)
+	{
+		this->pos = pos;
+		this->normal = normal;
+		this->uv = uv;
+	}
 	DirectX::XMFLOAT4 pos;
 	DirectX::XMFLOAT3 normal;
 	DirectX::XMFLOAT2 uv;

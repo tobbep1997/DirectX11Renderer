@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
-#include "../Window/Structs.h"
-#include "Drawable.h"
+#include "../../Window/Structs.h"
+#include "../Drawable.h"
 class Mesh :
 	public Drawable
 {
@@ -10,5 +10,8 @@ private:
 public:
 	Mesh();
 	~Mesh();
+
+	void SetMesh(std::vector<VERTEX> v);
+	
 };
 
