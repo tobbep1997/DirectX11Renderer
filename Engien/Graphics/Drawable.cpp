@@ -14,8 +14,10 @@ void Drawable::_buildMatrix()
 
 void Drawable::_createBuffer(VERTEX * V, const int& size)
 {
-	this->_meshSize = size;
+	DX::safeRelease(this->_vertexBuffer);
 
+	this->_meshSize = size;
+	
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;

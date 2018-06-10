@@ -241,7 +241,7 @@ void Window::_mapBuffers(Camera * camera)
 {
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 
-	CAMERA_BUFFER camBuff;
+	CAMERA_BUFFER camBuff = CAMERA_BUFFER();
 	camBuff.position = camera->GetPosition();
 	DX::g_deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
 	memcpy(dataPtr.pData, &camBuff, sizeof(CAMERA_BUFFER));
@@ -257,7 +257,7 @@ void Window::_geometryPass(Camera * camera)
 	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	ID3D11Buffer * vertexBuffer;
-	VERTEX_BUFFER V_Buffer;
+	VERTEX_BUFFER V_Buffer = VERTEX_BUFFER();
 
 	if (camera)
 	{
@@ -297,7 +297,7 @@ void Window::_geometryPass(Camera * camera)
 
 void Window::_lightPass()
 {
-	LIGHT_BUFFER light_buffer;
+	LIGHT_BUFFER light_buffer = LIGHT_BUFFER();
 	for (size_t i = 0; i < DX::lights.size(); i++)
 	{
 		light_buffer.info[i] =		XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(),0,0);

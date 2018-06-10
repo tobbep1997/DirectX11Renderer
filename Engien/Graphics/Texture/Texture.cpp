@@ -4,11 +4,16 @@
 
 HRESULT Texture::_loadTexture(const wchar_t * path, ID3D11Resource *& r, ID3D11ShaderResourceView *& srv)
 {
+	DX::safeRelease(r);
+	DX::safeRelease(srv);
 	return DirectX::CreateWICTextureFromFile(DX::g_device, DX::g_deviceContext, path, &r, &srv);
 }
 
 HRESULT Texture::_createSampler()
 {
+	DX::safeRelease(this->_samplerState);
+
+
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -18,7 +23,6 @@ HRESULT Texture::_createSampler()
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
 	return DX::g_device->CreateSamplerState(&sampDesc, &this->_samplerState);
 }
 

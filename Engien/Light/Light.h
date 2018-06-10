@@ -8,6 +8,13 @@
 	2 = spotlight
 */
 
+enum LIGHT_TYPE
+{
+	point,
+	directional,
+	spotlight
+};
+
 using namespace DirectX;
 class Light
 {
@@ -24,9 +31,13 @@ public:
 	void Draw();
 
 	void SetPosition(float x, float y, float z, float w = 1);
+	void SetDirection(float x, float y, float z, float w = 0);
 	void SetColor(float r, float g, float b, float a = 1);
 	void SetPosition(XMFLOAT4A position);
+	void SetDirection(XMFLOAT4A direction);
 	void SetColor(XMFLOAT4A color);
+
+	void SetLightType(LIGHT_TYPE lightType);
 
 	XMFLOAT4A GetPosition();
 	XMFLOAT4A GetDirection();

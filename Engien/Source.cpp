@@ -20,7 +20,8 @@ extern "C" {
 	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
 
-
+const int SCREEN_WIDTH = 1280;
+const int SCREEN_HIGHT = 720;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
@@ -30,10 +31,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	//Start here
 	Window wnd(hInstance);
-	wnd.Init(1280, 720, "Hello world", false);
+	wnd.Init(SCREEN_WIDTH, SCREEN_HIGHT, "Hello world", false);
 
 	Camera camera;
-	camera.Init();
+	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
 	camera.SetPosition(XMFLOAT4A(0, 0, 3, 1));
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	

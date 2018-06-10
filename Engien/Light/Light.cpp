@@ -25,6 +25,11 @@ void Light::SetPosition(float x, float y, float z, float w)
 	this->SetPosition(XMFLOAT4A(x, y, z, w));
 }
 
+void Light::SetDirection(float x, float y, float z, float w)
+{
+	this->SetDirection(XMFLOAT4A(x, y, z, w));
+}
+
 void Light::SetColor(float x, float y, float z, float w)
 {
 	this->SetColor(XMFLOAT4A(x, y, z, w));
@@ -35,9 +40,21 @@ void Light::SetPosition(XMFLOAT4A position)
 	this->_position = position;
 }
 
+void Light::SetDirection(XMFLOAT4A direction)
+{
+	XMVECTOR dir = XMLoadFloat4A(&direction);
+	dir = XMVector4Normalize(dir);
+	XMStoreFloat4A(&this->_direction, dir);
+}
+
 void Light::SetColor(XMFLOAT4A color)
 {
 	this->_color = color;
+}
+
+void Light::SetLightType(LIGHT_TYPE lightType)
+{
+	this->type = lightType;
 }
 
 XMFLOAT4A Light::GetPosition()
