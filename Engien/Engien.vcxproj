@@ -117,11 +117,12 @@
   <ItemGroup>
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Graphics\Drawable.h" />
-    <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\Mesh\Mesh.h" />
     <ClInclude Include="Graphics\Quad.h" />
     <ClInclude Include="Graphics\Texture\WICTextureLoader.h" />
     <ClInclude Include="Light\Light.h" />
     <ClInclude Include="Graphics\Texture\Texture.h" />
+    <ClInclude Include="Graphics\Mesh\MeshLoader.h" />
     <ClInclude Include="Window\Creator.h" />
     <ClInclude Include="Window\Extern.h" />
     <ClInclude Include="Window\Structs.h" />
@@ -130,10 +131,11 @@
   <ItemGroup>
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Graphics\Drawable.cpp" />
-    <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\Mesh\Mesh.cpp" />
     <ClCompile Include="Graphics\Quad.cpp" />
     <ClCompile Include="Graphics\Texture\WICTextureLoader.cpp" />
     <ClCompile Include="Light\Light.cpp" />
+    <ClCompile Include="Graphics\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Graphics\Texture\Texture.cpp" />
     <ClCompile Include="Window\Window.cpp" />
