@@ -42,22 +42,54 @@ std::vector<VERTEX> MeshLoader::_loadMesh(const wchar_t * path)
 			swscanf_s(input[i]->c_str(), L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
 			normal.push_back(new DirectX::XMFLOAT3(tmp.x, tmp.y, tmp.z));
 		}
-		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ')
+		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 8)
 		{
 			f = new FACE();
 			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3, &f->v4, &f->t4, &f->n4);
+			f->quad = true;
+			face.push_back(f);
+		}
+		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 6)
+		{
+			f = new FACE();
+			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3);
+			f->quad = false;
 			face.push_back(f);
 		}
 	}
-
-
-
-	for (size_t i = 0; i < input.size(); i++)
+	std::vector<VERTEX> v;
+	for (size_t i = 0; i < face.size(); i++)
 	{
-		delete input[i];
+		if (face[i]->quad)
+		{
+			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v2 - 1], *normal[face[i]->n2 - 1], *texPos[face[i]->t2 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
+
+			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v4 - 1], *normal[face[i]->n4 - 1], *texPos[face[i]->t4 - 1]));
+		}
+		else
+		{
+			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v2 - 1], *normal[face[i]->n2 - 1], *texPos[face[i]->t2 - 1]));
+			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
+		}
 	}
 
-	return std::vector<VERTEX>();
+	for (size_t i = 0; i < input.size(); i++)
+		delete input[i];
+	for (size_t i = 0; i < position.size(); i++)	
+		delete position[i];	
+	for (size_t i = 0; i < normal.size(); i++)
+		delete normal[i];	
+	for (size_t i = 0; i < texPos.size(); i++)	
+		delete texPos[i];	
+	for (size_t i = 0; i < face.size(); i++)
+		delete face[i];
+	
+	return v;
 }
 
 MeshLoader::MeshLoader()

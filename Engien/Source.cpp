@@ -37,8 +37,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	camera.SetPosition(XMFLOAT4A(0, 0, 3, 1));
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	
-	MeshLoader::LoadMesh("Mesh/Quad.obj");
-	//XMFLOAT4X4A test = camera.GetViewMatrix();
+	Mesh * draw = new Mesh();
+	draw->SetMesh(MeshLoader::LoadMesh("Mesh/Quad.obj"));
+	draw->LoadTexture("Texture/grass2.jpg");
+	draw->SetPosition(0, 0, 5);
+	
+
 	Light * light = new Light();
 	Light * light2 = new Light();
 	Light * light3 = new Light();
@@ -48,22 +52,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	light2->SetPosition(-3, 0, 5);
 	light3->SetColor(0, 1, 0);
 	light3->SetPosition(0, 0, 0);
-	Quad * draw = new Quad();
-	draw->LoadTexture("Texture/grass2.jpg");
-	draw->SetPosition(0, 0, 5);
+	
+
 	while (wnd.isOpen())
 	{
 		wnd.PollEvents();
 		wnd.Clear(); 
+
+
 		draw->SetRotation(0, draw->GetRotation().y + .0005f, 0);
 		draw->Draw();
+		
+
 		light->Draw();
 		light2->Draw();
 		light3->Draw();
+		
+		
 		wnd.Flush(&camera);
 	}
-
-
 
 	delete light;
 	delete light2;

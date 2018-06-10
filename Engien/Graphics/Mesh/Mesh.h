@@ -11,6 +11,7 @@ public:
 	Mesh();
 	~Mesh();
 
+	void SetMesh(std::vector<VERTEX> v);
 	
 };
 
