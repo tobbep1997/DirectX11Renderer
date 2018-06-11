@@ -271,23 +271,27 @@ void Window::_geometryPass(Camera * camera)
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	while (!DX::geometry.empty())
 	{
-		vertexBuffer = DX::geometry.front()->getVertexBuffer();
-		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
+		for (size_t i = 0; i < DX::geometry.front()->getObjectSize(); i++)
+		{
+			vertexBuffer = DX::geometry.front()->getVertexBuffer()[i];
+			DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
 
-		V_Buffer.worldMatrix = DX::geometry.front()->getWorldMatrix();
+			V_Buffer.worldMatrix = DX::geometry.front()->getWorldMatrix();
 
-		DX::g_deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
-		memcpy(dataPtr.pData, &V_Buffer, sizeof(VERTEX_BUFFER));
-		DX::g_deviceContext->Unmap(m_constantBuffer, 0);
+			DX::g_deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+			memcpy(dataPtr.pData, &V_Buffer, sizeof(VERTEX_BUFFER));
+			DX::g_deviceContext->Unmap(m_constantBuffer, 0);
 		
-		DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-		ID3D11SamplerState * ss = DX::geometry.front()->GetTexture()->GetSamplerState();
-		ID3D11ShaderResourceView * srv = DX::geometry.front()->GetTexture()->GetShaderResourceView();
+			DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
+			ID3D11SamplerState * ss = DX::geometry.front()->GetTexture()[i]->GetSamplerState();
+			ID3D11ShaderResourceView * srv = DX::geometry.front()->GetTexture()[i]->GetShaderResourceView();
 
-		DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
-		DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
+			DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
+			DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
 
-		DX::g_deviceContext->Draw(DX::geometry.front()->getVertexSize(), 0);
+			DX::g_deviceContext->Draw(DX::geometry.front()->getVertexSize()[i], 0);
+
+		}
 
 		DX::geometry.pop();
 	}

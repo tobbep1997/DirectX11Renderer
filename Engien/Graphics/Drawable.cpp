@@ -14,9 +14,17 @@ void Drawable::_buildMatrix()
 
 void Drawable::_createBuffer(VERTEX * V, const int& size)
 {
-	DX::safeRelease(this->_vertexBuffer);
+	for (unsigned int i = 0; i < this->_objectSize; i++)
+		DX::safeRelease(this->_vertexBuffer[i]);
 
-	this->_meshSize = size;
+	if (_meshSize)
+		delete[] _meshSize;
+	this->_meshSize = new UINT[1];
+
+	this->_vertexBuffer = new ID3D11Buffer*[1];
+
+	this->_objectSize = 1;
+	this->_meshSize[0] = size;
 	
 	D3D11_BUFFER_DESC bufferDesc;
 	memset(&bufferDesc, 0, sizeof(bufferDesc));
@@ -26,7 +34,31 @@ void Drawable::_createBuffer(VERTEX * V, const int& size)
 	
 	D3D11_SUBRESOURCE_DATA vertexData;
 	vertexData.pSysMem = V;
-	HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer);
+	HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[0]);
+}
+
+void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V, std::vector<std::string> texturePath)
+{
+	for (unsigned int i = 0; i < this->_objectSize; i++)
+		DX::safeRelease(this->_vertexBuffer[i]);
+
+	this->_objectSize = static_cast<UINT>(V.size());
+	for (size_t i = 0; i < V.size(); i++)
+	{
+		this->_vertexBuffer = new ID3D11Buffer*[V.size()];
+
+		this->_meshSize[i] = static_cast<UINT>(V[i].size());
+
+		D3D11_BUFFER_DESC bufferDesc;
+		memset(&bufferDesc, 0, sizeof(bufferDesc));
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.ByteWidth = sizeof(VERTEX) * static_cast<UINT>(V[i].size());
+
+		D3D11_SUBRESOURCE_DATA vertexData;
+		vertexData.pSysMem = V[i].data();
+		HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[0]);
+	}
 }
 
 Drawable::Drawable()
@@ -35,13 +67,22 @@ Drawable::Drawable()
 	this->_scale	= XMFLOAT4A(1, 1, 1, 1);
 	this->_rotation	= XMFLOAT4A(0, 0, 0, 1);
 	this->_buildMatrix();
-	this->_texture = new Texture();
+	this->_texture = nullptr;
+	this->_vertexBuffer = nullptr;
+	this->_meshSize = nullptr;
 }
 
 Drawable::~Drawable()
 {
-	DX::safeRelease(this->_vertexBuffer);
-	delete this->_texture;
+	for (unsigned int i = 0; i < this->_objectSize; i++)
+		DX::safeRelease(this->_vertexBuffer[i]);
+	delete[] this->_vertexBuffer;
+	for (unsigned int i = 0; i < this->_objectSize; i++)
+		delete this->_texture[i];
+	delete[] this->_texture;
+
+	delete[] _meshSize;
+
 }
 
 void Drawable::Draw()
@@ -99,15 +140,17 @@ DirectX::XMFLOAT4A Drawable::GetScale() const
 
 void Drawable::LoadTexture(const std::string & path)
 {
-	this->_texture->LoadTexture(path);
+	this->_texture = new Texture*[1];
+	this->_texture[0] = new Texture();
+	this->_texture[0]->LoadTexture(path);
 }
 
-ID3D11Buffer * Drawable::getVertexBuffer()
+ID3D11Buffer ** Drawable::getVertexBuffer()
 {
 	return this->_vertexBuffer;
 }
 
-UINT Drawable::getVertexSize()
+UINT * Drawable::getVertexSize()
 {
 	return this->_meshSize;
 }
@@ -117,7 +160,12 @@ DirectX::XMFLOAT4X4A& Drawable::getWorldMatrix()
 	return this->_worldMatrix;
 }
 
-Texture * Drawable::GetTexture()
+Texture ** Drawable::GetTexture()
 {
 	return this->_texture;
+}
+
+UINT Drawable::getObjectSize()
+{
+	return this->_objectSize;
 }
