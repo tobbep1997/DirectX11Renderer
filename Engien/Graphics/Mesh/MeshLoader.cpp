@@ -2,19 +2,21 @@
 
 
 #include <iostream>
-std::vector<VERTEX> MeshLoader::_loadMesh(const wchar_t * path)
+std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 {
 	std::vector <DirectX::XMFLOAT4*>	position;
 	std::vector <DirectX::XMFLOAT3*>	normal;
 	std::vector <DirectX::XMFLOAT2*>	texPos;
-	std::vector <FACE *>				face;
+	std::vector <std::vector<FACE *>>	face;
 
 	std::wifstream in(path);
+
+	bool firstObject = false;
 
 	if (!in.is_open())
 	{
 		std::cout << "Didn't find file" << std::endl;
-		return std::vector<VERTEX>();
+		return std::vector<std::vector<VERTEX>>();
 
 	}
 	std::vector<std::wstring*> input;
@@ -27,6 +29,7 @@ std::vector<VERTEX> MeshLoader::_loadMesh(const wchar_t * path)
 	in.close();
 	DirectX::XMFLOAT4 tmp;
 	FACE * f;
+	std::vector<FACE *> f_v;
 	for (size_t i = 0; i < input.size(); i++)
 	{
 		if ((*input[i])[0] == L'#') {}
@@ -42,40 +45,57 @@ std::vector<VERTEX> MeshLoader::_loadMesh(const wchar_t * path)
 			swscanf_s(input[i]->c_str(), L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
 			normal.push_back(new DirectX::XMFLOAT3(tmp.x, tmp.y, tmp.z));
 		}
+		else if ((*input[i])[0] == L'g' && (*input[i])[1] == L' ') {
+			if (f_v.size() > 0)
+			{
+				face.push_back(f_v);
+				f_v.clear();
+			}
+		}
 		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 8)
 		{
 			f = new FACE();
 			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3, &f->v4, &f->t4, &f->n4);
 			f->quad = true;
-			face.push_back(f);
+			f_v.push_back(f);
 		}
 		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 6)
 		{
 			f = new FACE();
 			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3);
 			f->quad = false;
-			face.push_back(f);
+			f_v.push_back(f);
 		}
 	}
-	std::vector<VERTEX> v;
+	face.push_back(f_v);
+
+	std::vector<std::vector<VERTEX>> v;
+	std::vector<VERTEX> v_v;
 	for (size_t i = 0; i < face.size(); i++)
 	{
-		if (face[i]->quad)
+		for (size_t j = 0; j < face[i].size(); j++)
 		{
-			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v2 - 1], *normal[face[i]->n2 - 1], *texPos[face[i]->t2 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
 
-			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v4 - 1], *normal[face[i]->n4 - 1], *texPos[face[i]->t4 - 1]));
+			if (face[i][j]->quad)
+			{
+				v_v.push_back(VERTEX(*position[face[i][j]->v1 - 1], *normal[face[i][j]->n1 - 1], *texPos[face[i][j]->t1 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v2 - 1], *normal[face[i][j]->n2 - 1], *texPos[face[i][j]->t2 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v3 - 1], *normal[face[i][j]->n3 - 1], *texPos[face[i][j]->t3 - 1]));
+
+				v_v.push_back(VERTEX(*position[face[i][j]->v1 - 1], *normal[face[i][j]->n1 - 1], *texPos[face[i][j]->t1 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v3 - 1], *normal[face[i][j]->n3 - 1], *texPos[face[i][j]->t3 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v4 - 1], *normal[face[i][j]->n4 - 1], *texPos[face[i][j]->t4 - 1]));
+			}
+			else
+			{
+				v_v.push_back(VERTEX(*position[face[i][j]->v1 - 1], *normal[face[i][j]->n1 - 1], *texPos[face[i][j]->t1 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v2 - 1], *normal[face[i][j]->n2 - 1], *texPos[face[i][j]->t2 - 1]));
+				v_v.push_back(VERTEX(*position[face[i][j]->v3 - 1], *normal[face[i][j]->n3 - 1], *texPos[face[i][j]->t3 - 1]));
+			}
 		}
-		else
-		{
-			v.push_back(VERTEX(*position[face[i]->v1 - 1], *normal[face[i]->n1 - 1], *texPos[face[i]->t1 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v2 - 1], *normal[face[i]->n2 - 1], *texPos[face[i]->t2 - 1]));
-			v.push_back(VERTEX(*position[face[i]->v3 - 1], *normal[face[i]->n3 - 1], *texPos[face[i]->t3 - 1]));
-		}
+		if (face[i].size() > 0)
+			v.push_back(v_v);
+		v_v.clear();
 	}
 
 	for (size_t i = 0; i < input.size(); i++)
@@ -87,7 +107,8 @@ std::vector<VERTEX> MeshLoader::_loadMesh(const wchar_t * path)
 	for (size_t i = 0; i < texPos.size(); i++)	
 		delete texPos[i];	
 	for (size_t i = 0; i < face.size(); i++)
-		delete face[i];
+		for (size_t j = 0; j < face[i].size(); j++)
+			delete face[i][j];
 	
 	return v;
 }
@@ -101,7 +122,7 @@ MeshLoader::~MeshLoader()
 {
 }
 
-std::vector<VERTEX> MeshLoader::LoadMesh(const std::string & path)
+std::vector<std::vector<VERTEX>> MeshLoader::LoadMesh(const std::string & path)
 {
 	std::wstring wstr = std::wstring(path.begin(), path.end());
 

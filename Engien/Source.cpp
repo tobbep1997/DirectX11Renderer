@@ -35,11 +35,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	Camera camera;
 	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
-	camera.SetPosition(XMFLOAT4A(0, 0, 3, 1));
+	camera.SetPosition(XMFLOAT4A(0, 0, 0, 1));
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	
 	Mesh * draw = new Mesh();
-	draw->SetMesh(MeshLoader::LoadMesh("Mesh/Quad.obj"));
+	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/DualQuadObject.obj"));
 	draw->LoadTexture("Texture/grass2.jpg");
 	draw->SetPosition(0, 0, 5);
 	

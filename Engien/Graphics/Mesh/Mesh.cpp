@@ -13,6 +13,12 @@ Mesh::~Mesh()
 
 void Mesh::SetMesh(std::vector<VERTEX> v)
 {
+	this->vertex.push_back(v);
+	this->_createBuffer(this->vertex[0].data(), static_cast<int>(this->vertex[0].size()));
+}
+
+void Mesh::SetMeshes(std::vector<std::vector<VERTEX>> v)
+{
 	this->vertex = v;
-	this->_createBuffer(this->vertex.data(), static_cast<int>(this->vertex.size()));
+	this->_createMultBuffer(this->vertex);
 }

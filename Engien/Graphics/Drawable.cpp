@@ -37,15 +37,19 @@ void Drawable::_createBuffer(VERTEX * V, const int& size)
 	HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[0]);
 }
 
-void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V, std::vector<std::string> texturePath)
+void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V)
 {
 	for (unsigned int i = 0; i < this->_objectSize; i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
 
+	if (this->_meshSize)
+		delete[] _meshSize;
+
+	this->_vertexBuffer = new ID3D11Buffer*[V.size()];
 	this->_objectSize = static_cast<UINT>(V.size());
+	this->_meshSize = new UINT[V.size()];
 	for (size_t i = 0; i < V.size(); i++)
 	{
-		this->_vertexBuffer = new ID3D11Buffer*[V.size()];
 
 		this->_meshSize[i] = static_cast<UINT>(V[i].size());
 
@@ -57,7 +61,7 @@ void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V, std::vector
 
 		D3D11_SUBRESOURCE_DATA vertexData;
 		vertexData.pSysMem = V[i].data();
-		HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[0]);
+		HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[i]);
 	}
 }
 
@@ -77,8 +81,8 @@ Drawable::~Drawable()
 	for (unsigned int i = 0; i < this->_objectSize; i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
 	delete[] this->_vertexBuffer;
-	for (unsigned int i = 0; i < this->_objectSize; i++)
-		delete this->_texture[i];
+	//for (unsigned int i = 0; i < this->_objectSize; i++)
+		delete this->_texture[0];
 	delete[] this->_texture;
 
 	delete[] _meshSize;

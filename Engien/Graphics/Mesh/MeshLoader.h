@@ -17,11 +17,11 @@ private:
 		int t1, t2, t3, t4;
 		int n1, n2, n3, n4;
 	};
-	static std::vector<VERTEX> _loadMesh(const wchar_t * path);
+	static std::vector<std::vector<VERTEX>> _loadMesh(const wchar_t * path);
 public:
 	MeshLoader();
 	~MeshLoader();
 
-	static std::vector<VERTEX> LoadMesh(const std::string & path);
+	static std::vector<std::vector<VERTEX>> LoadMesh(const std::string & path);
 };
 

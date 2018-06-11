@@ -6,12 +6,13 @@ class Mesh :
 	public Drawable
 {
 private:
-	std::vector<VERTEX> vertex;
+	std::vector<std::vector<VERTEX>> vertex;
 public:
 	Mesh();
 	~Mesh();
 
 	void SetMesh(std::vector<VERTEX> v);
+	void SetMeshes(std::vector<std::vector<VERTEX>> V);
 	
 };
 

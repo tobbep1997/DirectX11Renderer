@@ -24,7 +24,7 @@ private:
 	void _buildMatrix();
 protected:
 	void _createBuffer(VERTEX * V, const int& size);
-	void _createMultBuffer(std::vector<std::vector<VERTEX>> V, std::vector<std::string> texturePath);
+	void _createMultBuffer(std::vector<std::vector<VERTEX>> V);
 
 public:
 	Drawable();
