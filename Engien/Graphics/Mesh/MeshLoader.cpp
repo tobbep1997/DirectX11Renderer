@@ -19,54 +19,61 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 		return std::vector<std::vector<VERTEX>>();
 
 	}
-	std::vector<std::wstring*> input;
-	wchar_t buff[256];
-	while (!in.eof())
-	{
-		in.getline(buff, 256);
-		input.push_back(new std::wstring(buff));
-	}
-	in.close();
+	//std::vector<std::wstring*> input;
 	DirectX::XMFLOAT4 tmp;
 	FACE * f;
 	std::vector<FACE *> f_v;
-	for (size_t i = 0; i < input.size(); i++)
+	wchar_t input[256];
+	while (!in.eof())
 	{
-		if ((*input[i])[0] == L'#') {}
-		else if ((*input[i])[0] == L'v' && (*input[i])[1] == L' ') {
-			swscanf_s(input[i]->c_str(), L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
+		in.getline(input, 256);
+		//input.push_back(new std::wstring(buff));
+	
+	//for (size_t i = 0; i < input.size(); i++)
+	//{
+		if (input[0] == L'#') {}
+		else if (input[0] == L'v' && input[1] == L' ') {
+			swscanf_s(input, L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
 			position.push_back(new DirectX::XMFLOAT4(tmp.x, tmp.y, tmp.z, 1.0f));
 		}
-		else if ((*input[i])[0] == L'v' && (*input[i])[1] == L't') {
-			swscanf_s(input[i]->c_str(), L"%*s %f %f", &tmp.x, &tmp.y);
+		else if (input[0] == L'v' && input[1] == L't') {
+			swscanf_s(input, L"%*s %f %f", &tmp.x, &tmp.y);
 			texPos.push_back(new DirectX::XMFLOAT2(tmp.x, tmp.y));
 		}
-		else if ((*input[i])[0] == L'v' && (*input[i])[1] == L'n') {
-			swscanf_s(input[i]->c_str(), L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
+		else if (input[0] == L'v' && input[1] == L'n') {
+			swscanf_s(input, L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
 			normal.push_back(new DirectX::XMFLOAT3(tmp.x, tmp.y, tmp.z));
 		}
-		else if ((*input[i])[0] == L'g' && (*input[i])[1] == L' ') {
+		else if (input[0] == L'g' && input[1] == L' ') {
 			if (f_v.size() > 0)
 			{
 				face.push_back(f_v);
 				f_v.clear();
 			}
+			
 		}
-		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 8)
+		else if (input[0] == L'f' && input[1] == L' ' && std::count(&input[0], &input[256], '/') == 8)
 		{
 			f = new FACE();
-			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3, &f->v4, &f->t4, &f->n4);
+			int gh = std::count(&input[0], &input[256], '/');
+			swscanf_s(input, L"%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3, &f->v4, &f->t4, &f->n4);
 			f->quad = true;
 			f_v.push_back(f);
 		}
-		else if ((*input[i])[0] == L'f' && (*input[i])[1] == L' ' && std::count(input[i]->begin(), input[i]->end(), '/') == 6)
+		else if (input[0] == L'f' && input[1] == L' ' && std::count(&input[0], &input[256], '/') == 6)
 		{
 			f = new FACE();
-			swscanf_s(input[i]->c_str(), L"%*s %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3);
+			int gh = std::count(&input[0], &input[256], '/');
+			swscanf_s(input, L"%*s %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3);
 			f->quad = false;
 			f_v.push_back(f);
 		}
+		for (size_t i = 0; i < 256; i++)
+		{
+			input[i] = NULL;
+		}
 	}
+	in.close();
 	face.push_back(f_v);
 
 	std::vector<std::vector<VERTEX>> v;
@@ -98,8 +105,6 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 		v_v.clear();
 	}
 
-	for (size_t i = 0; i < input.size(); i++)
-		delete input[i];
 	for (size_t i = 0; i < position.size(); i++)	
 		delete position[i];	
 	for (size_t i = 0; i < normal.size(); i++)
