@@ -119,6 +119,7 @@
     <ClInclude Include="Graphics\Drawable.h" />
     <ClInclude Include="Graphics\Mesh\Mesh.h" />
     <ClInclude Include="Graphics\Quad.h" />
+    <ClInclude Include="Graphics\Texture\Material.h" />
     <ClInclude Include="Graphics\Texture\WICTextureLoader.h" />
     <ClInclude Include="Light\Light.h" />
     <ClInclude Include="Graphics\Texture\Texture.h" />
@@ -133,6 +134,7 @@
     <ClCompile Include="Graphics\Drawable.cpp" />
     <ClCompile Include="Graphics\Mesh\Mesh.cpp" />
     <ClCompile Include="Graphics\Quad.cpp" />
+    <ClCompile Include="Graphics\Texture\Material.cpp" />
     <ClCompile Include="Graphics\Texture\WICTextureLoader.cpp" />
     <ClCompile Include="Light\Light.cpp" />
     <ClCompile Include="Graphics\Mesh\MeshLoader.cpp" />

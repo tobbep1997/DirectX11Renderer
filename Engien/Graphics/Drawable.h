@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "../Window/Structs.h"
-#include "Texture\Texture.h"
+#include "Texture\Material.h"
 #include <vector>
 
 using namespace DirectX;
@@ -16,7 +16,7 @@ private:
 	DirectX::XMFLOAT4X4A _worldMatrix;
 
 	ID3D11Buffer **	_vertexBuffer;
-	Texture ** _texture;
+	Material ** _material;
 	UINT * _meshSize;
 	UINT _objectSize;
 
@@ -45,7 +45,7 @@ public:
 	void LoadTexture(const std::string& path);
 
 	ID3D11Buffer **	getVertexBuffer();
-	Texture **		GetTexture();
+	Material **		GetMaterial();
 	UINT			getObjectSize();
 	UINT *			getVertexSize();
 

@@ -285,8 +285,8 @@ void Window::_geometryPass(Camera * camera)
 			DX::g_deviceContext->Unmap(m_constantBuffer, 0);
 		
 			DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
-			ID3D11SamplerState * ss = DX::geometry.front()->GetTexture()[0]->GetSamplerState();
-			ID3D11ShaderResourceView * srv = DX::geometry.front()->GetTexture()[0]->GetShaderResourceView();
+			ID3D11SamplerState * ss = DX::geometry.front()->GetMaterial()[0]->GetTexture()->GetSamplerState();
+			ID3D11ShaderResourceView * srv = DX::geometry.front()->GetMaterial()[0]->GetTexture()->GetShaderResourceView();
 
 			DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
 			DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);

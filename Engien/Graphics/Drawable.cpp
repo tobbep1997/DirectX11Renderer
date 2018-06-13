@@ -71,7 +71,7 @@ Drawable::Drawable()
 	this->_scale	= XMFLOAT4A(1, 1, 1, 1);
 	this->_rotation	= XMFLOAT4A(0, 0, 0, 1);
 	this->_buildMatrix();
-	this->_texture = nullptr;
+	this->_material = nullptr;
 	this->_vertexBuffer = nullptr;
 	this->_meshSize = nullptr;
 }
@@ -81,9 +81,13 @@ Drawable::~Drawable()
 	for (unsigned int i = 0; i < this->_objectSize; i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
 	delete[] this->_vertexBuffer;
-	//for (unsigned int i = 0; i < this->_objectSize; i++)
-		delete this->_texture[0];
-	delete[] this->_texture;
+	for (unsigned int i = 0; i < this->_objectSize; i++)
+		if (this->_material[i])
+		{
+			delete this->_material[0];
+			this->_material[0] = nullptr;
+		}
+	delete[] this->_material;
 
 	delete[] _meshSize;
 
@@ -144,9 +148,9 @@ DirectX::XMFLOAT4A Drawable::GetScale() const
 
 void Drawable::LoadTexture(const std::string & path)
 {
-	this->_texture = new Texture*[1];
-	this->_texture[0] = new Texture();
-	this->_texture[0]->LoadTexture(path);
+	this->_material = new Material*[1];
+	this->_material[0] = new Material(std::wstring(path.begin(), path.end()));
+	this->_material[0]->LoadTexture(std::wstring(path.begin(), path.end()));
 }
 
 ID3D11Buffer ** Drawable::getVertexBuffer()
@@ -164,9 +168,9 @@ DirectX::XMFLOAT4X4A& Drawable::getWorldMatrix()
 	return this->_worldMatrix;
 }
 
-Texture ** Drawable::GetTexture()
+Material ** Drawable::GetMaterial()
 {
-	return this->_texture;
+	return this->_material;
 }
 
 UINT Drawable::getObjectSize()
