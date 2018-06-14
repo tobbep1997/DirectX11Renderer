@@ -15,10 +15,10 @@ private:
 	DirectX::XMFLOAT4A	_rotation;
 	DirectX::XMFLOAT4X4A _worldMatrix;
 
-	ID3D11Buffer **	_vertexBuffer;
-	Material ** _material;
-	UINT * _meshSize;
-	UINT _objectSize;
+	std::vector<ID3D11Buffer *>	_vertexBuffer;
+	std::vector<Material *>		_material;
+	std::vector<UINT>			_meshSize;
+	//UINT _objectSize;
 
 
 	void _buildMatrix();
@@ -44,9 +44,9 @@ public:
 
 	void LoadTexture(const std::string& path);
 
-	ID3D11Buffer **	getVertexBuffer();
-	Material **		GetMaterial();
-	UINT			getObjectSize();
+	std::vector<ID3D11Buffer *>	getVertexBuffer();
+	std::vector<Material *>		GetMaterial();
+	size_t			getObjectSize();
 	UINT *			getVertexSize();
 
 	DirectX::XMFLOAT4X4A& getWorldMatrix();
