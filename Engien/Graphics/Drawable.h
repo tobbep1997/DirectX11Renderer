@@ -24,7 +24,7 @@ private:
 	void _buildMatrix();
 protected:
 	void _createBuffer(VERTEX * V, const int& size);
-	void _createMultBuffer(std::vector<std::vector<VERTEX>> V);
+	void _createMultBuffer(MESH mesh);
 
 public:
 	Drawable();

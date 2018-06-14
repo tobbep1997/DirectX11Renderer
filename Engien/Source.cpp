@@ -39,8 +39,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	
 	Mesh * draw = new Mesh();
-	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Cat.obj"));
-	draw->LoadTexture("Texture/grass2.jpg");
+	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
+	//draw->LoadTexture("Texture/grass2.jpg");
 	draw->SetPosition(0, 0, 5);
 	
 

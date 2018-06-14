@@ -2,13 +2,17 @@
 
 
 #include <iostream>
-std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
+MESH MeshLoader::_loadMesh(const wchar_t * path)
 {
 	std::vector <DirectX::XMFLOAT4*>	position;
 	std::vector <DirectX::XMFLOAT3*>	normal;
 	std::vector <DirectX::XMFLOAT2*>	texPos;
 	std::vector <std::vector<FACE *>>	face;
+	std::vector	<std::wstring>			mtlName;
 
+	std::wstring p = std::wstring(path);
+	size_t t = p.find_last_of(L'/');
+	p = p.substr(0, t + 1);
 	std::wifstream in(path);
 
 	bool firstObject = false;
@@ -16,14 +20,19 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 	if (!in.is_open())
 	{
 		std::cout << "Didn't find file" << std::endl;
-		return std::vector<std::vector<VERTEX>>();
+		return MESH();
 
 	}
 	//std::vector<std::wstring*> input;
 	DirectX::XMFLOAT4 tmp;
 	FACE * f;
 	std::vector<FACE *> f_v;
+	MESH m;
+	std::wstring mtllib;
+
 	wchar_t input[256];
+	wchar_t cInput[256];
+
 	while (!in.eof())
 	{
 		in.getline(input, 256);
@@ -44,7 +53,7 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 			swscanf_s(input, L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);
 			normal.push_back(new DirectX::XMFLOAT3(tmp.x, tmp.y, tmp.z));
 		}
-		else if (input[0] == L'g' && input[1] == L' ') {
+		else if ((input[0] == L'g' || input[0] == L'o') && input[1] == L' ') {
 			if (f_v.size() > 0)
 			{
 				face.push_back(f_v);
@@ -55,7 +64,6 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 		else if (input[0] == L'f' && input[1] == L' ' && std::count(&input[0], &input[256], '/') == 8)
 		{
 			f = new FACE();
-			int gh = std::count(&input[0], &input[256], '/');
 			swscanf_s(input, L"%*s %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3, &f->v4, &f->t4, &f->n4);
 			f->quad = true;
 			f_v.push_back(f);
@@ -63,17 +71,26 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 		else if (input[0] == L'f' && input[1] == L' ' && std::count(&input[0], &input[256], '/') == 6)
 		{
 			f = new FACE();
-			int gh = std::count(&input[0], &input[256], '/');
 			swscanf_s(input, L"%*s %d/%d/%d %d/%d/%d %d/%d/%d", &f->v1, &f->t1, &f->n1, &f->v2, &f->t2, &f->n2, &f->v3, &f->t3, &f->n3);
 			f->quad = false;
 			f_v.push_back(f);
 		}
+		else if (input[0] == L'm' && input[1] == L't') {
+			swscanf_s(input, L"%*ls %s", cInput, 256);			
+			mtllib = std::wstring(cInput);
+		}
+		else if (input[0] == L'u' && input[1] == L's') {
+			swscanf_s(input, L"%*ls %s", cInput, 256);
+			m.material.push_back(new Material(p + mtllib, std::wstring(cInput)));
+		}
 		for (size_t i = 0; i < 256; i++)
 		{
 			input[i] = NULL;
+			cInput[i] = NULL;
 		}
 	}
 	in.close();
+
 	face.push_back(f_v);
 
 	std::vector<std::vector<VERTEX>> v;
@@ -115,19 +132,20 @@ std::vector<std::vector<VERTEX>> MeshLoader::_loadMesh(const wchar_t * path)
 		for (size_t j = 0; j < face[i].size(); j++)
 			delete face[i][j];
 	
-	return v;
+	m.vertex = v;
+
+	return m;
 }
 
 MeshLoader::MeshLoader()
 {
 }
 
-
 MeshLoader::~MeshLoader()
 {
 }
 
-std::vector<std::vector<VERTEX>> MeshLoader::LoadMesh(const std::string & path)
+MESH MeshLoader::LoadMesh(const std::string & path)
 {
 	std::wstring wstr = std::wstring(path.begin(), path.end());
 

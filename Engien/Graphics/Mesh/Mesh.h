@@ -12,7 +12,7 @@ public:
 	~Mesh();
 
 	void SetMesh(std::vector<VERTEX> v);
-	void SetMeshes(std::vector<std::vector<VERTEX>> V);
+	void SetMeshes(MESH V);
 	
 };
 

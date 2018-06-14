@@ -37,7 +37,7 @@ void Drawable::_createBuffer(VERTEX * V, const int& size)
 	HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[0]);
 }
 
-void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V)
+void Drawable::_createMultBuffer(MESH mesh)
 {
 	for (unsigned int i = 0; i < this->_objectSize; i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
@@ -45,23 +45,28 @@ void Drawable::_createMultBuffer(std::vector<std::vector<VERTEX>> V)
 	if (this->_meshSize)
 		delete[] _meshSize;
 
-	this->_vertexBuffer = new ID3D11Buffer*[V.size()];
-	this->_objectSize = static_cast<UINT>(V.size());
-	this->_meshSize = new UINT[V.size()];
-	for (size_t i = 0; i < V.size(); i++)
+	this->_vertexBuffer = new ID3D11Buffer*[mesh.vertex.size()];
+	this->_objectSize = static_cast<UINT>(mesh.vertex.size());
+	this->_meshSize = new UINT[mesh.vertex.size()];
+	for (size_t i = 0; i < mesh.vertex.size(); i++)
 	{
 
-		this->_meshSize[i] = static_cast<UINT>(V[i].size());
+		this->_meshSize[i] = static_cast<UINT>(mesh.vertex[i].size());
 
 		D3D11_BUFFER_DESC bufferDesc;
 		memset(&bufferDesc, 0, sizeof(bufferDesc));
 		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		bufferDesc.ByteWidth = sizeof(VERTEX) * static_cast<UINT>(V[i].size());
+		bufferDesc.ByteWidth = sizeof(VERTEX) * static_cast<UINT>(mesh.vertex[i].size());
 
 		D3D11_SUBRESOURCE_DATA vertexData;
-		vertexData.pSysMem = V[i].data();
+		vertexData.pSysMem = mesh.vertex[i].data();
 		HRESULT hr = DX::g_device->CreateBuffer(&bufferDesc, &vertexData, &this->_vertexBuffer[i]);
+	}
+	this->_material = new Material*[mesh.material.size()];
+	for (int i = 0; i < mesh.material.size(); i++)
+	{
+		this->_material[i] = mesh.material[i];
 	}
 }
 
@@ -149,7 +154,7 @@ DirectX::XMFLOAT4A Drawable::GetScale() const
 void Drawable::LoadTexture(const std::string & path)
 {
 	this->_material = new Material*[1];
-	this->_material[0] = new Material(std::wstring(path.begin(), path.end()));
+	this->_material[0] = new Material();
 	this->_material[0]->LoadTexture(std::wstring(path.begin(), path.end()));
 }
 

@@ -1,7 +1,7 @@
 cbuffer WORLD_BUFFER : register (b0)
 {
-    float4x4 worldMatrix;
-    float4x4 viewProjection;
+    float4x4 worldMatrix;       //rotation * scale * translation
+    float4x4 viewProjection;    //view * projection
 };
 
 struct VS_INPUT
@@ -21,9 +21,14 @@ struct VS_OUTPUT
 VS_OUTPUT main( VS_INPUT input )
 {
     VS_OUTPUT o;
+    
+    
+    //  Here we multiply the position to world and projection space
     o.pos = mul(input.pos, mul(worldMatrix, viewProjection));
     o.worldPos = mul(input.pos, worldMatrix);
+    //  The normal must also be moved to worldspace 
     o.normal = mul(float4(input.normal, 0), worldMatrix).xyz;
+    //  We just pass the texCoods 
     o.texCoord = input.texCoord;
     return o;
 }

@@ -17,8 +17,8 @@ void Mesh::SetMesh(std::vector<VERTEX> v)
 	this->_createBuffer(this->vertex[0].data(), static_cast<int>(this->vertex[0].size()));
 }
 
-void Mesh::SetMeshes(std::vector<std::vector<VERTEX>> v)
+void Mesh::SetMeshes(MESH v)
 {
-	this->vertex = v;
-	this->_createMultBuffer(this->vertex);
+	this->vertex = v.vertex;
+	this->_createMultBuffer(v);
 }

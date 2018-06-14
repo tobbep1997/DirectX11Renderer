@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
+#include "../Graphics/Texture/Material.h"
 struct VERTEX 
 {
 	VERTEX()
@@ -27,13 +28,19 @@ struct VERTEX_BUFFER
 
 struct LIGHT_BUFFER
 {
-	DirectX::XMINT4		info[256];
-	DirectX::XMFLOAT4A	position[256];
-	DirectX::XMFLOAT4A	direction[256];
-	DirectX::XMFLOAT4A	color[256];
+	DirectX::XMINT4		info[64];
+	DirectX::XMFLOAT4A	position[64];
+	DirectX::XMFLOAT4A	direction[64];
+	DirectX::XMFLOAT4A	color[64];
 };
 
 struct CAMERA_BUFFER
 {
 	DirectX::XMFLOAT4A	position;
+};
+
+struct MESH
+{
+	std::vector<std::vector<VERTEX>>	vertex;
+	std::vector<Material*>				material;
 };
