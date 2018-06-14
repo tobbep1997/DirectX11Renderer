@@ -39,19 +39,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	
 	Mesh * draw = new Mesh();
-	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
-	draw->LoadTexture("Texture/grass2.jpg");
+	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/DualTex.obj"));
+	//draw->LoadTexture("Texture/grass2.jpg");
 	draw->SetPosition(0, 0, 5);
-	
+	//draw->SetScale(.01, .01, .01);
 
 	Light * light = new Light();
 	Light * light2 = new Light();
 	Light * light3 = new Light();
-	light->SetColor(1, 0, 0);
+	light->SetColor(1, 1, 1);
 	light->SetPosition(3, 0, 5);
-	light2->SetColor(0, 0, 1);
+	light2->SetColor(1, 1, 1);
 	light2->SetPosition(-3, 0, 5);
-	light3->SetColor(0, 1, 0);
+	light3->SetColor(1, 1, 1);
 	light3->SetPosition(0, 0, 0);
 	
 

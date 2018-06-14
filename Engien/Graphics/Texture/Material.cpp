@@ -25,13 +25,16 @@ void Material::_loadMTL(const std::wstring & path, const std::wstring & matName)
 		in.getline(input, 256);
 		inputConvert = std::wstring(input);
 		if (input[0] == L'#' && !skip) {}
-		else if (inputConvert.substr(0, inputConvert.find(' ')) == matName)
+		else if (inputConvert.substr(0, inputConvert.find(' ')) == L"newmtl")
 		{
-			skip = false;
+			swscanf_s(input, L"%*ls %ls", ipt, 1024);
+			if (std::wstring(ipt) == matName)
+				skip = false;
 		}
-		else if (inputConvert.substr(0, inputConvert.find(' ')) == L"map_Kd") {
+		else if (inputConvert.substr(0, inputConvert.find(' ')) == L"map_Kd" && !skip) {
 			swscanf_s(input, L"%*ls %ls", ipt, 1024);
 			this->Kd_map = std::wstring(ipt);
+			skip = true;
 		}
 
 		for (size_t i = 0; i < 256; i++)
