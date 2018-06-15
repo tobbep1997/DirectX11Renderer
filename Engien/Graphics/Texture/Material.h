@@ -16,6 +16,9 @@ private:
 private:
 	void _loadMTL(const std::wstring & path, const std::wstring & matName);
 	void _loadTexture(const std::wstring & path);
+
+	std::wstring getName(const std::wstring & path);
+	std::wstring getPath(const std::wstring & path);
 public:
 	Material(const std::wstring & path = L"", const std::wstring & matName = L"");
 	~Material();

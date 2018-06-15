@@ -15,6 +15,7 @@ MESH MeshLoader::_loadMesh(const wchar_t * path)
 	p = p.substr(0, t + 1);
 	std::wifstream in(path);
 
+
 	bool firstObject = false;
 
 	if (!in.is_open())
@@ -23,6 +24,7 @@ MESH MeshLoader::_loadMesh(const wchar_t * path)
 		return MESH();
 
 	}
+
 	//std::vector<std::wstring*> input;
 	DirectX::XMFLOAT4 tmp;
 	FACE * f;
@@ -32,7 +34,6 @@ MESH MeshLoader::_loadMesh(const wchar_t * path)
 
 	wchar_t input[256];
 	wchar_t cInput[256];
-
 	while (!in.eof())
 	{
 		in.getline(input, 256);
