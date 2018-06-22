@@ -52,8 +52,16 @@ void Material::_loadMTL(const std::wstring & path, const std::wstring & matName)
 
 void Material::_loadTexture(const std::wstring & path)
 {
+	if (path == L"")
+		return;
 	this->_texture = new Texture();
 	this->_texture->LoadTexture(std::string(path.begin(), path.end()));
+}
+
+void Material::_loadNormalMap(const std::wstring & path)
+{
+	this->_normalMap = new Texture();
+	this->_normalMap->LoadTexture(std::string(path.begin(), path.end()));
 }
 
 std::wstring Material::getName(const std::wstring & path)
@@ -71,12 +79,14 @@ std::wstring Material::getPath(const std::wstring & path)
 Material::Material(const std::wstring & path, const std::wstring & matName)
 {
 	this->_texture = nullptr;
+	this->_normalMap = nullptr;
 	this->_loadMTL(path, matName);
 }
 
 Material::~Material()
 {
 	delete this->_texture;
+	delete this->_normalMap;
 }
 
 void Material::LoadMTL(const std::wstring & path, const std::wstring & matName)
@@ -89,9 +99,19 @@ void Material::LoadTexture(const std::wstring & path)
 	this->_loadTexture(path);
 }
 
+void Material::LoadNormalMap(const std::wstring & path)
+{
+	this->_loadNormalMap(path);
+}
+
 Texture * Material::GetTexture() const
 {
 	return this->_texture;
+}
+
+Texture * Material::GetNormalMap() const
+{
+	return this->_normalMap;
 }
 
 std::wstring Material::GetMaterialName()

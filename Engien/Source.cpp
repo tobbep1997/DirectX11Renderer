@@ -35,37 +35,39 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	Camera camera;
 	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
-	camera.SetPosition(XMFLOAT4A(0, 0, 0, 1));
-	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
+	camera.SetPosition(XMFLOAT4A(0, 2, 0, 1));
+	camera.SetDirection(XMFLOAT4A(0, -.55f, 1, 0));
 	
 	Mesh * draw = new Mesh();
 	Mesh * floor = new Mesh();
 	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
-	draw->LoadTexture("Texture/stone.jpg");
+	draw->LoadTexture("Texture/stone2.jpg");
+	draw->LoadNormalMap("Texture/NormalMap2.png");
 	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
+	//floor->LoadNormalMap("Texture/NormalMap.png");
 	//floor->LoadTexture("Texture/stone.jpg");
 
 	draw->SetPosition(0, 0, 5);
-	floor->SetPosition(0, -4, 5);
+	floor->SetPosition(0, -2, 5);
 
-	draw->SetScale(2, 2, 2);
-	floor->SetScale(20, 1, 20);
+	draw->SetScale(1, 1, 1);
+	floor->SetScale(10, 1, 10);
 
 
 
 	Light * light = new Light();
 	Light * light2 = new Light();
 	Light * light3 = new Light();
-	light->SetLightType(LIGHT_TYPE::spotlight);
+	light->SetLightType(LIGHT_TYPE::directional);
 	light->SetColor(1, 1, 1);
 	light->SetPosition(0, 5, 0);
 	light->SetDirection(0, -1, 1);
 	light->CastShadow();
 
 	light2->SetColor(1, 1, 1);
-	light2->SetPosition(-3, 0, 0);
+	light2->SetPosition(-5, 0, 5);
 	light3->SetColor(1, 1, 1);
-	light3->SetPosition(3, 0, 0);
+	light3->SetPosition(5, 0, 5);
 
 	while (wnd.isOpen())
 	{
@@ -73,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		wnd.Clear(); 
 
 
-		draw->SetRotation(0, draw->GetRotation().y + .0005f, 0);
+		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
 		draw->Draw();
 		floor->Draw();
 

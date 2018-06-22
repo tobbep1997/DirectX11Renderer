@@ -41,6 +41,7 @@ private:
 	ID3D11Buffer*				m_constantBuffer;
 	ID3D11Buffer*				m_lightBuffer;
 	ID3D11Buffer*				m_cameraBuffer;
+	ID3D11Buffer*				m_texInfoBuffer;
 
 	//Shadows
 	ID3D11VertexShader*			m_vertexShadow;

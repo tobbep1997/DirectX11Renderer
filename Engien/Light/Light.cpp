@@ -13,7 +13,7 @@ void Light::_createViewMatrix()
 void Light::_createProjectionMatrix()
 {
 	
-	XMStoreFloat4x4A(&this->_projectionMatrix, XMMatrixTranspose(XMMatrixOrthographicLH(4096 / 64, 4096 / 64, 1, 20)));
+	XMStoreFloat4x4A(&this->_projectionMatrix, XMMatrixTranspose(XMMatrixOrthographicLH(4096 / 256, 4096 / 256, 1, 20)));
 }
 
 Light::Light()
@@ -85,7 +85,7 @@ void Light::CreateMatrixes()
 
 bool Light::CastShadow()
 {
-	if (type != LIGHT_TYPE::spotlight)
+	if (type == LIGHT_TYPE::point)
 		return false;
 	else
 	{

@@ -43,6 +43,7 @@ public:
 	DirectX::XMFLOAT4A GetScale() const;
 
 	void LoadTexture(const std::string& path);
+	void LoadNormalMap(const std::string& path);
 
 	std::vector<ID3D11Buffer *>	getVertexBuffer();
 	std::vector<Material *>		GetMaterial();

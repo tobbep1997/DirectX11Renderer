@@ -8,6 +8,7 @@ struct VERTEX
 		this->pos = DirectX::XMFLOAT4();
 		this->normal = DirectX::XMFLOAT3();
 		this->uv = DirectX::XMFLOAT2();
+		this->tangent = DirectX::XMFLOAT3();
 	}
 	VERTEX(DirectX::XMFLOAT4 pos, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT2 uv)
 	{
@@ -18,6 +19,7 @@ struct VERTEX
 	DirectX::XMFLOAT4 pos;
 	DirectX::XMFLOAT3 normal;
 	DirectX::XMFLOAT2 uv;
+	DirectX::XMFLOAT3 tangent;
 };
 
 struct VERTEX_BUFFER
@@ -43,4 +45,12 @@ struct MESH
 {
 	std::vector<std::vector<VERTEX>>	vertex;
 	std::vector<Material*>				material;
+};
+
+struct TEX_INFO
+{
+	BOOL texture;
+	BOOL normal;
+	BOOL pad1;
+	BOOL pad2;
 };

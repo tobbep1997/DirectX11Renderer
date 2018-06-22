@@ -132,7 +132,49 @@ MESH MeshLoader::_loadMesh(const wchar_t * path)
 	
 	m.vertex = v;
 
+	_calcTangents(&m);
+
 	return m;
+}
+
+void MeshLoader::_calcTangents(MESH * m)
+{
+	for (size_t mS = 0; mS < m->vertex.size(); mS++)
+		for (int i = 0; i < m->vertex[mS].size() - 2; i += 3)
+		{
+			int j = i + 1;
+			int k = i + 2;
+
+			DirectX::XMVECTOR v1 = DirectX::XMVectorSet(m->vertex[mS][j].pos.x, m->vertex[mS][j].pos.y, m->vertex[mS][j].pos.z, NULL);
+			DirectX::XMVECTOR v2 = DirectX::XMVectorSet(m->vertex[mS][k].pos.x, m->vertex[mS][k].pos.y, m->vertex[mS][k].pos.z, NULL);
+			DirectX::XMVECTOR v0 = DirectX::XMVectorSet(m->vertex[mS][i].pos.x, m->vertex[mS][i].pos.y, m->vertex[mS][i].pos.z, NULL);
+
+			DirectX::XMVECTOR edge1 = DirectX::XMVectorSubtract(v1, v0);
+			DirectX::XMVECTOR edge2 = DirectX::XMVectorSubtract(v2, v0);
+
+			float deltaU1 = m->vertex[mS][j].uv.x - m->vertex[mS][i].uv.x;
+			float deltaV1 = m->vertex[mS][j].uv.y - m->vertex[mS][i].uv.y;
+			float deltaU2 = m->vertex[mS][k].uv.x - m->vertex[mS][i].uv.x;
+			float deltaV2 = m->vertex[mS][k].uv.y - m->vertex[mS][i].uv.y;
+
+			DirectX::XMFLOAT3 tangent;
+
+			tangent.x = deltaV2 * DirectX::XMVectorGetX(edge1) - deltaV1 * DirectX::XMVectorGetX(edge2);
+			tangent.y = deltaV2 * DirectX::XMVectorGetY(edge1) - deltaV1 * DirectX::XMVectorGetY(edge2);
+			tangent.z = deltaV2 * DirectX::XMVectorGetZ(edge1) - deltaV1 * DirectX::XMVectorGetZ(edge2);
+
+			DirectX::XMVECTOR vTangent;
+
+			vTangent = DirectX::XMVector3Normalize(XMLoadFloat3(&tangent));
+
+			for (int counter = 0; counter < 3; counter++)
+			{
+				int index = i + counter;
+				m->vertex[mS][index].tangent.x = DirectX::XMVectorGetX(vTangent);
+				m->vertex[mS][index].tangent.y = DirectX::XMVectorGetY(vTangent);
+				m->vertex[mS][index].tangent.z = DirectX::XMVectorGetZ(vTangent);
+			}
+		}
 }
 
 MeshLoader::MeshLoader()

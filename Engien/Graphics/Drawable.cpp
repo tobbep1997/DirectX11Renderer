@@ -37,10 +37,6 @@ void Drawable::_createMultBuffer(MESH mesh)
 	for (unsigned int i = 0; i < this->_vertexBuffer.size(); i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
 
-
-	//this->_vertexBuffer = new ID3D11Buffer*[mesh.vertex.size()];
-	//this->_objectSize = static_cast<UINT>(mesh.vertex.size());
-	//this->_meshSize = new UINT[mesh.vertex.size()];
 	for (size_t i = 0; i < mesh.vertex.size(); i++)
 	{
 
@@ -142,6 +138,14 @@ void Drawable::LoadTexture(const std::string & path)
 	this->_material.clear();
 	this->_material.push_back(new Material());
 	this->_material[0]->LoadTexture(std::wstring(path.begin(), path.end()));
+}
+
+void Drawable::LoadNormalMap(const std::string & path)
+{
+	for (size_t i = 0; i < this->_material.size(); i++)
+	{
+		this->_material[i]->LoadNormalMap(std::wstring(path.begin(), path.end()));
+	}
 }
 
 std::vector<ID3D11Buffer *> Drawable::getVertexBuffer()

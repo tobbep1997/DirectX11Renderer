@@ -7,6 +7,7 @@ class Mesh :
 {
 private:
 	std::vector<std::vector<VERTEX>> vertex;
+	
 public:
 	Mesh();
 	~Mesh();
