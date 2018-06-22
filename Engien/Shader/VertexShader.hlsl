@@ -27,7 +27,7 @@ VS_OUTPUT main( VS_INPUT input )
     o.pos = mul(input.pos, mul(worldMatrix, viewProjection));
     o.worldPos = mul(input.pos, worldMatrix);
     //  The normal must also be moved to worldspace 
-    o.normal = mul(float4(input.normal, 0), worldMatrix).xyz;
+    o.normal = normalize(mul(float4(input.normal, 0), worldMatrix).xyz);
     //  We just pass the texCoods 
     o.texCoord = input.texCoord;
     return o;

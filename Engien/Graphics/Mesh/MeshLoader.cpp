@@ -37,10 +37,7 @@ MESH MeshLoader::_loadMesh(const wchar_t * path)
 	while (!in.eof())
 	{
 		in.getline(input, 256);
-		//input.push_back(new std::wstring(buff));
-	
-	//for (size_t i = 0; i < input.size(); i++)
-	//{
+
 		if (input[0] == L'#') {}
 		else if (input[0] == L'v' && input[1] == L' ') {
 			swscanf_s(input, L"%*s %f %f %f", &tmp.x, &tmp.y, &tmp.z);

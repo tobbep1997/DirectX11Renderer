@@ -19,11 +19,19 @@ using namespace DirectX;
 class Light
 {
 private:
-	XMFLOAT4A _position;
-	XMFLOAT4A _direction;
-	XMFLOAT4A _color;
+	XMFLOAT4A	_position;
+	XMFLOAT4A	_direction;
+	XMFLOAT4A	_color;
+
+	XMFLOAT4A	_up;
+
+	XMFLOAT4X4A _viewMatrix;
+	XMFLOAT4X4A _projectionMatrix;
+	XMFLOAT4X4A _viewProjectionMatrix;
 	int type;
 protected:
+	void _createViewMatrix();
+	void _createProjectionMatrix();
 public:
 	Light();
 	~Light();
@@ -38,6 +46,10 @@ public:
 	void SetColor(XMFLOAT4A color);
 
 	void SetLightType(LIGHT_TYPE lightType);
+
+	void CreateMatrixes();
+
+	bool CastShadow();
 
 	XMFLOAT4A GetPosition();
 	XMFLOAT4A GetDirection();

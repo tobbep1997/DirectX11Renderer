@@ -15,32 +15,46 @@ using namespace DirectX;
 class Window
 {
 private:
-	IDXGISwapChain*			m_swapChain;
-	ID3D11RenderTargetView*	m_backBufferRTV;
-	ID3D11DepthStencilView* m_depthStencilView;
-	ID3D11Texture2D*		m_depthBufferTex;
-	ID3D11SamplerState*		m_samplerState;
+	IDXGISwapChain*				m_swapChain;
+	ID3D11RenderTargetView*		m_backBufferRTV;
+	ID3D11DepthStencilView*		m_depthStencilView;
+	ID3D11Texture2D*			m_depthBufferTex;
+	ID3D11SamplerState*			m_samplerState;
 
-	D3D11_VIEWPORT			m_viewport;
+	D3D11_VIEWPORT				m_viewport;
 
-	HINSTANCE				m_hInstance;
-	HWND					m_hwnd;
-	INT						m_width;
-	INT						m_height;
-	LPCSTR					m_title;
-	MSG						m_msg = { 0 };
+	HINSTANCE					m_hInstance;
+	HWND						m_hwnd;
+	INT							m_width;
+	INT							m_height;
+	LPCSTR						m_title;
+	MSG							m_msg = { 0 };
 
-	INT						m_sampleCount;
-	BOOL					m_fullscreen;
+	INT							m_sampleCount;
+	BOOL						m_fullscreen;
 	
-	ID3D11InputLayout*		m_inputLayout;
+	ID3D11InputLayout*			m_inputLayout;
 
-	ID3D11VertexShader*		m_vertexShader;
-	ID3D11PixelShader*		m_pixelShader;
+	ID3D11VertexShader*			m_vertexShader;
+	ID3D11PixelShader*			m_pixelShader;
 
-	ID3D11Buffer*			m_constantBuffer;
-	ID3D11Buffer*			m_lightBuffer;
-	ID3D11Buffer*			m_cameraBuffer;
+	ID3D11Buffer*				m_constantBuffer;
+	ID3D11Buffer*				m_lightBuffer;
+	ID3D11Buffer*				m_cameraBuffer;
+
+	//Shadows
+	ID3D11VertexShader*			m_vertexShadow;
+
+	ID3D11InputLayout*			m_shadowInputLayout;
+
+	ID3D11DepthStencilView*		m_shadowDepthStencilView;
+	ID3D11Texture2D*			m_shadowDepthBufferTex;
+	ID3D11SamplerState*			m_shadowSamplerState;
+	ID3D11ShaderResourceView *	m_shadowShaderResourceView;
+
+	ID3D11Buffer*				m_shadowBuffer;
+
+	D3D11_VIEWPORT				m_shadowViewport;
 
 
 private:
@@ -59,6 +73,9 @@ private:
 	void _geometryPass(Camera * camera = nullptr);
 
 	void _lightPass();
+
+	void _loadShadow();
+	void _shadowPass();
 
 	void _releaseIUnknown();
 

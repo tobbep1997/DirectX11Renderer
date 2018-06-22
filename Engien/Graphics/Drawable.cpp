@@ -17,13 +17,6 @@ void Drawable::_createBuffer(VERTEX * V, const int& size)
 	for (unsigned int i = 0; i < this->_vertexBuffer.size(); i++)
 		DX::safeRelease(this->_vertexBuffer[i]);
 
-	//if (_meshSize)
-	//	delete[] _meshSize;
-	//this->_meshSize = new UINT[1];
-
-	//this->_vertexBuffer = new ID3D11Buffer*[1];
-
-	//this->_objectSize = 1;
 	this->_meshSize.push_back(size);
 	
 	D3D11_BUFFER_DESC bufferDesc;
@@ -91,7 +84,7 @@ Drawable::~Drawable()
 
 void Drawable::Draw()
 {
-	DX::geometry.push(this);
+	DX::geometry.push_back(this);
 }
 
 void Drawable::SetPosition(DirectX::XMFLOAT4A p)

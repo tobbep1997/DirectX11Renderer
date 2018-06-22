@@ -15,14 +15,14 @@ private:
 
 protected:
 	void _createViewMatrix();
-	void _createPerspectivProjectionMatrix(float fovRad = XM_PI / 2, float aspectRatio = 16.0f/9.0f, float nearPlane = 1.0f, float farPlane = 20.0f);
+	void _createPerspectivProjectionMatrix(float fovRad = XM_PI / 2, float aspectRatio = 16.0f/9.0f, float nearPlane = 1.0f, float farPlane = 200.0f);
 	void _createViewProjectionMatrix();
 
 public:
 	Camera();
 	~Camera();
 
-	void Init(float fovRad = XM_PI / 2, float aspectRatio = 16.0f / 9.0f, float nearPlane = 1.0f, float farPlane = 20.0f);
+	void Init(float fovRad = XM_PI / 2, float aspectRatio = 16.0f / 9.0f, float nearPlane = 1.0f, float farPlane = 200.0f);
 
 	void SetPosition(float x, float y, float z, float w = 1);
 	void SetDirection(float x, float y, float z, float w = 0);

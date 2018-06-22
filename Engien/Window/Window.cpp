@@ -4,8 +4,10 @@
 ID3D11Device*			DX::g_device;
 ID3D11DeviceContext*	DX::g_deviceContext;
 
-std::queue<Drawable*>	DX::geometry;
+std::vector	<Drawable*>	DX::geometry;
 std::vector	<Light*>	DX::lights;
+
+DirectX::XMFLOAT4X4A	DX::shadowViewProjection;
 
 void DX::safeRelease(IUnknown * u)
 {
@@ -144,7 +146,6 @@ void Window::_initViewPort()
 
 void Window::_setViewport()
 {
-
 	DX::g_deviceContext->RSSetViewports(1, &m_viewport);
 }
 
@@ -169,6 +170,7 @@ void Window::_createBuffers()
 	lightConstant.StructureByteStride = 0;
 
 	hr = DX::g_device->CreateBuffer(&lightConstant, nullptr, &this->m_lightBuffer);
+
 	D3D11_BUFFER_DESC cameraBuffer;
 	cameraBuffer.Usage = D3D11_USAGE_DYNAMIC;
 	cameraBuffer.ByteWidth = sizeof(CAMERA_BUFFER);
@@ -179,57 +181,32 @@ void Window::_createBuffers()
 
 	hr = DX::g_device->CreateBuffer(&cameraBuffer, nullptr, &this->m_cameraBuffer);
 
+	D3D11_BUFFER_DESC shadowBuffer;
+	shadowBuffer.Usage = D3D11_USAGE_DYNAMIC;
+	shadowBuffer.ByteWidth = sizeof(XMFLOAT4X4A);
+	shadowBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	shadowBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	shadowBuffer.MiscFlags = 0;
+	shadowBuffer.StructureByteStride = 0;
+
+	hr = DX::g_device->CreateBuffer(&shadowBuffer, nullptr, &this->m_shadowBuffer);
+
 }
 
 void Window::_createShaders()
 {
-	ID3DBlob * pVS = nullptr;
-
-	HRESULT hr = D3DCompileFromFile(
-		L"Shader/VertexShader.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"main",		// entry point
-		"vs_5_0",		// shader model (target)
-		0,				// shader compile options			// here DEBUGGING OPTIONS
-		0,				// effect compile options
-		&pVS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	);
-	if (!FAILED(hr))
-		DX::g_device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &m_vertexShader);
+	ID3DBlob * blob = nullptr;
+	Creator::createVertexShader(L"Shader/VertexShader.hlsl", &m_vertexShader, &blob, false);
 
 	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	hr = DX::g_device->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &m_inputLayout);
-	pVS->Release();
-	DX::g_deviceContext->IASetInputLayout(m_inputLayout);
+	HRESULT hr = DX::g_device->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), blob->GetBufferPointer(), blob->GetBufferSize(), &m_inputLayout);
+	hr = Creator::createPixelShader(L"Shader/PixelShader.hlsl", &m_pixelShader, &blob);
 
-
-	ID3DBlob * pPS = nullptr;
-	hr = D3DCompileFromFile(
-		L"Shader/PixelShader.hlsl", // filename
-		nullptr,		// optional macros
-		nullptr,		// optional include files
-		"main",		// entry point
-		"ps_5_0",		// shader model (target)
-		0,				// shader compile options			// here DEBUGGING OPTIONS
-		0,				// effect compile options
-		&pPS,			// double pointer to ID3DBlob		
-		nullptr			// pointer for Error Blob messages.
-						// how to use the Error blob, see here
-						// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
-	);
-	if (!FAILED(hr))
-		DX::g_device->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &m_pixelShader);
-	pPS->Release();
-	DX::g_deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
-	DX::g_deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
+	hr = Creator::createVertexShader(L"Shader/VertexShadow.hlsl", &m_vertexShadow, &blob, false);
 }
 
 void Window::_present(int sync)
@@ -248,10 +225,25 @@ void Window::_mapBuffers(Camera * camera)
 	DX::g_deviceContext->Unmap(m_cameraBuffer, 0);
 
 	DX::g_deviceContext->PSSetConstantBuffers(1, 1, &m_cameraBuffer);
+
+	DX::g_deviceContext->Map(m_shadowBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+	memcpy(dataPtr.pData, &DX::shadowViewProjection, sizeof(XMFLOAT4X4A));
+	DX::g_deviceContext->Unmap(m_shadowBuffer, 0);
+
+	DX::g_deviceContext->PSSetConstantBuffers(2, 1, &m_shadowBuffer);
 }
 
 void Window::_geometryPass(Camera * camera)
 {
+	DX::g_deviceContext->IASetInputLayout(m_inputLayout);
+	DX::g_deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
+	DX::g_deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
+	DX::g_deviceContext->OMSetRenderTargets(1, &m_backBufferRTV, m_depthStencilView);
+
+
+	DX::g_deviceContext->RSSetViewports(1, &m_viewport);
+
+
 	UINT32 vertexSize = sizeof(VERTEX);
 	UINT32 offset = 0;
 	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -267,16 +259,17 @@ void Window::_geometryPass(Camera * camera)
 		V_Buffer.viewProjection = DirectX::XMFLOAT4X4A();
 	}
 
+	DX::g_deviceContext->PSSetShaderResources(1, 1, &m_shadowShaderResourceView);
 
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
-	while (!DX::geometry.empty())
+	for (size_t i = 0; i < DX::geometry.size(); i++)
 	{
-		V_Buffer.worldMatrix = DX::geometry.front()->getWorldMatrix();
+		V_Buffer.worldMatrix = DX::geometry[i]->getWorldMatrix();
 
-		for (size_t i = 0; i < DX::geometry.front()->getObjectSize(); i++)
+		for (size_t j = 0; j < DX::geometry[i]->getObjectSize(); j++)
 		{
-			Drawable * d = DX::geometry.front();
-			vertexBuffer = DX::geometry.front()->getVertexBuffer()[i];
+			Drawable * d = DX::geometry[i];
+			vertexBuffer = DX::geometry[i]->getVertexBuffer()[j];
 			DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
 
 
@@ -287,28 +280,24 @@ void Window::_geometryPass(Camera * camera)
 			DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
 			if (i < d->GetMaterial().size())
 			{
-				ID3D11SamplerState * ss = DX::geometry.front()->GetMaterial()[i]->GetTexture()->GetSamplerState();
-				ID3D11ShaderResourceView * srv = DX::geometry.front()->GetMaterial()[i]->GetTexture()->GetShaderResourceView();
+				ID3D11SamplerState * ss = DX::geometry[i]->GetMaterial()[j]->GetTexture()->GetSamplerState();
+				ID3D11ShaderResourceView * srv = DX::geometry[i]->GetMaterial()[j]->GetTexture()->GetShaderResourceView();
 				DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
 				DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
 			}
 			else
 			{
-				ID3D11SamplerState * ss = DX::geometry.front()->GetMaterial()[0]->GetTexture()->GetSamplerState();
-				ID3D11ShaderResourceView * srv = DX::geometry.front()->GetMaterial()[0]->GetTexture()->GetShaderResourceView();
+				ID3D11SamplerState * ss = DX::geometry[i]->GetMaterial()[0]->GetTexture()->GetSamplerState();
+				ID3D11ShaderResourceView * srv = DX::geometry[i]->GetMaterial()[0]->GetTexture()->GetShaderResourceView();
 				DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
 				DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
 			}
 
 
-			DX::g_deviceContext->Draw(DX::geometry.front()->getVertexSize()[i], 0);
+			DX::g_deviceContext->Draw(DX::geometry[i]->getVertexSize()[j], 0);
 
 		}
-
-		DX::geometry.pop();
 	}
-	
-
 }
 
 void Window::_lightPass()
@@ -336,6 +325,114 @@ void Window::_lightPass()
 	DX::g_deviceContext->PSSetConstantBuffers(0, 1, &m_lightBuffer);
 }
 
+void Window::_loadShadow()
+{
+	HRESULT hr;
+
+	D3D11_TEXTURE2D_DESC texDesc;
+	texDesc.Width = 4096;
+	texDesc.Height = 4096;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	hr = DX::g_device->CreateTexture2D(&texDesc, NULL, &m_shadowDepthBufferTex);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	dsvDesc.Flags = 0;
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+
+	hr = DX::g_device->CreateDepthStencilView(m_shadowDepthBufferTex, &dsvDesc, &m_shadowDepthStencilView);
+
+	m_shadowViewport.Width = 4096;
+	m_shadowViewport.Height = 4096;
+	m_shadowViewport.MinDepth = 0.0f;
+	m_shadowViewport.MaxDepth = 1.0f;
+	m_shadowViewport.TopLeftX = 0;
+	m_shadowViewport.TopLeftY = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+
+	hr = DX::g_device->CreateShaderResourceView(m_shadowDepthBufferTex, &srvDesc, &m_shadowShaderResourceView);
+}
+
+void Window::_shadowPass()
+{
+	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DX::g_deviceContext->IASetInputLayout(m_inputLayout);
+	DX::g_deviceContext->VSSetShader(m_vertexShadow, nullptr, 0);
+	DX::g_deviceContext->HSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->DSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->GSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->PSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->OMSetRenderTargets(0, nullptr, m_shadowDepthStencilView);
+
+
+	DX::g_deviceContext->RSSetViewports(1, &m_shadowViewport);
+
+	
+
+	UINT32 vertexSize = sizeof(VERTEX);
+	UINT32 offset = 0;
+	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	ID3D11Buffer * vertexBuffer;
+	VERTEX_BUFFER V_Buffer = VERTEX_BUFFER();
+
+	V_Buffer.viewProjection = DX::shadowViewProjection;
+
+	D3D11_MAPPED_SUBRESOURCE dataPtr;
+	
+	for (size_t i = 0; i < DX::geometry.size(); i++)
+	{
+		V_Buffer.worldMatrix = DX::geometry[i]->getWorldMatrix();
+
+		for (size_t j = 0; j < DX::geometry[i]->getObjectSize(); j++)
+		{
+			Drawable * d = DX::geometry[i];
+			vertexBuffer = DX::geometry[i]->getVertexBuffer()[j];
+			DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &vertexSize, &offset);
+
+
+			DX::g_deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+			memcpy(dataPtr.pData, &V_Buffer, sizeof(VERTEX_BUFFER));
+			DX::g_deviceContext->Unmap(m_constantBuffer, 0);
+
+			DX::g_deviceContext->VSSetConstantBuffers(0, 1, &m_constantBuffer);
+			if (i < d->GetMaterial().size())
+			{
+				ID3D11SamplerState * ss = DX::geometry[i]->GetMaterial()[j]->GetTexture()->GetSamplerState();
+				ID3D11ShaderResourceView * srv = DX::geometry[i]->GetMaterial()[j]->GetTexture()->GetShaderResourceView();
+				DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
+				DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
+			}
+			else
+			{
+				ID3D11SamplerState * ss = DX::geometry[i]->GetMaterial()[0]->GetTexture()->GetSamplerState();
+				ID3D11ShaderResourceView * srv = DX::geometry[i]->GetMaterial()[0]->GetTexture()->GetShaderResourceView();
+				DX::g_deviceContext->PSSetSamplers(0, 1, &ss);
+				DX::g_deviceContext->PSSetShaderResources(0, 1, &srv);
+			}
+
+
+			DX::g_deviceContext->Draw(DX::geometry[i]->getVertexSize()[j], 0);
+
+		}
+	}
+}
+
 void Window::_releaseIUnknown()
 {
 	DX::safeRelease(m_swapChain);
@@ -352,6 +449,13 @@ void Window::_releaseIUnknown()
 	DX::safeRelease(m_lightBuffer);
 	DX::safeRelease(m_cameraBuffer);
 
+	DX::safeRelease(m_vertexShadow);
+	DX::safeRelease(m_shadowInputLayout);
+	DX::safeRelease(m_shadowDepthStencilView);
+	DX::safeRelease(m_shadowDepthBufferTex);
+	DX::safeRelease(m_shadowSamplerState);
+	DX::safeRelease(m_shadowShaderResourceView);
+	DX::safeRelease(m_shadowBuffer);
 
 	DX::safeRelease(DX::g_deviceContext);
 	DX::safeRelease(DX::g_device);
@@ -439,6 +543,7 @@ bool Window::Init(int width, int height, LPCSTR title, BOOL fullscreen)
 	ShowWindow(m_hwnd, 10);
 	this->_createBuffers();
 	this->_createShaders();
+	this->_loadShadow();
 	return false;
 }
 
@@ -464,7 +569,11 @@ void Window::Clear()
 	DX::g_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	DX::g_deviceContext->OMSetBlendState(nullptr, 0, 0xffffffff);
 
+
+	DX::g_deviceContext->ClearDepthStencilView(m_shadowDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	DX::lights.clear();
+	DX::geometry.clear();
 
 }
 
@@ -472,6 +581,7 @@ void Window::Flush(Camera * camera)
 {
 	if (camera)
 		this->_mapBuffers(camera);
+	this->_shadowPass();
 	this->_lightPass();
 	this->_geometryPass(camera);
 	this->_present();

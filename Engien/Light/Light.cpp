@@ -2,11 +2,26 @@
 #include "../Window/Extern.h"
 
 
+void Light::_createViewMatrix()
+{
+	XMVECTOR pos = XMLoadFloat4A(&this->_position);
+	XMVECTOR direction = XMLoadFloat4A(&this->_direction);
+	XMVECTOR up = XMLoadFloat4A(&this->_up);
+	XMStoreFloat4x4A(&this->_viewMatrix, XMMatrixTranspose(XMMatrixLookToLH(pos, direction, up)));
+}
+
+void Light::_createProjectionMatrix()
+{
+	
+	XMStoreFloat4x4A(&this->_projectionMatrix, XMMatrixTranspose(XMMatrixOrthographicLH(4096 / 64, 4096 / 64, 1, 20)));
+}
+
 Light::Light()
 {
 	this->_position = XMFLOAT4A(0, 0, 0, 1);
 	this->_direction = XMFLOAT4A(0, 0, 0, 0);
 	this->_color = XMFLOAT4A(1, 1, 1, 1);
+	this->_up = XMFLOAT4A(0, 1, 0, 1);
 	this->type = 0;
 }
 
@@ -55,6 +70,29 @@ void Light::SetColor(XMFLOAT4A color)
 void Light::SetLightType(LIGHT_TYPE lightType)
 {
 	this->type = lightType;
+}
+
+void Light::CreateMatrixes()
+{
+	this->_createViewMatrix();
+	this->_createProjectionMatrix();
+
+	XMMATRIX view = XMLoadFloat4x4A(&this->_viewMatrix);
+	XMMATRIX projection = XMLoadFloat4x4A(&this->_projectionMatrix);
+
+	XMStoreFloat4x4A(&this->_viewProjectionMatrix, projection * view);
+}
+
+bool Light::CastShadow()
+{
+	if (type != LIGHT_TYPE::spotlight)
+		return false;
+	else
+	{
+		this->CreateMatrixes();
+		DX::shadowViewProjection = this->_viewProjectionMatrix;
+		return true;
+	}
 }
 
 XMFLOAT4A Light::GetPosition()

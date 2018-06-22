@@ -39,21 +39,33 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	camera.SetDirection(XMFLOAT4A(0, 0, 1, 0));
 	
 	Mesh * draw = new Mesh();
-	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/DualTex.obj"));
-	//draw->LoadTexture("Texture/grass2.jpg");
+	Mesh * floor = new Mesh();
+	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
+	draw->LoadTexture("Texture/stone.jpg");
+	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
+	//floor->LoadTexture("Texture/stone.jpg");
+
 	draw->SetPosition(0, 0, 5);
-	//draw->SetScale(.01, .01, .01);
+	floor->SetPosition(0, -4, 5);
+
+	draw->SetScale(2, 2, 2);
+	floor->SetScale(20, 1, 20);
+
+
 
 	Light * light = new Light();
 	Light * light2 = new Light();
 	Light * light3 = new Light();
+	light->SetLightType(LIGHT_TYPE::spotlight);
 	light->SetColor(1, 1, 1);
-	light->SetPosition(3, 0, 5);
+	light->SetPosition(0, 5, 0);
+	light->SetDirection(0, -1, 1);
+	light->CastShadow();
+
 	light2->SetColor(1, 1, 1);
-	light2->SetPosition(-3, 0, 5);
+	light2->SetPosition(-3, 0, 0);
 	light3->SetColor(1, 1, 1);
-	light3->SetPosition(0, 0, 0);
-	
+	light3->SetPosition(3, 0, 0);
 
 	while (wnd.isOpen())
 	{
@@ -63,7 +75,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 		draw->SetRotation(0, draw->GetRotation().y + .0005f, 0);
 		draw->Draw();
-		
+		floor->Draw();
 
 		light->Draw();
 		light2->Draw();
@@ -77,5 +89,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	delete light2;
 	delete light3;
 	delete draw;
+	delete floor;
 	return 0;
 }

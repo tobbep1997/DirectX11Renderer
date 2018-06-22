@@ -93,5 +93,6 @@
   <ItemGroup>
     <FxCompile Include="Shader\PixelShader.hlsl" />
     <FxCompile Include="Shader\VertexShader.hlsl" />
+    <FxCompile Include="Shader\VertexShadow.hlsl" />
   </ItemGroup>
 </Project>
