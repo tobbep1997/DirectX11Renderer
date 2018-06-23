@@ -23,6 +23,7 @@ Light::Light()
 	this->_color = XMFLOAT4A(1, 1, 1, 1);
 	this->_up = XMFLOAT4A(0, 1, 0, 1);
 	this->type = 0;
+	this->castShadow = false;
 }
 
 
@@ -91,6 +92,7 @@ bool Light::CastShadow()
 	{
 		this->CreateMatrixes();
 		DX::shadowViewProjection = this->_viewProjectionMatrix;
+		this->castShadow = true;
 		return true;
 	}
 }
@@ -113,4 +115,9 @@ XMFLOAT4A Light::GetColor()
 int Light::GetInfo()
 {
 	return this->type;
+}
+
+bool Light::GetCastShadow() const
+{
+	return castShadow;
 }

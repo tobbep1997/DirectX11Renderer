@@ -38,8 +38,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	Camera camera;
 	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
 	camera.SetPosition(XMFLOAT4A(0, 2, 5, 1));
-	camera.SetDirection(XMFLOAT4A(0, -.55f, 1, 0));
+	camera.SetDirection(XMFLOAT4A(1, 0, 0, 0));
 	
+
 	Mesh * draw = new Mesh();
 	Mesh * floor = new Mesh();
 	Mesh * wall = new Mesh();
@@ -83,16 +84,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		wnd.PollEvents();
 		wnd.Clear(); 
 	
-		if (Input::GetKeyDown('A'))
-			camera.SetPosition(camera.GetPosition().x - 0.01f, camera.GetPosition().y, camera.GetPosition().z);
-		if (Input::GetKeyDown('D'))
-			camera.SetPosition(camera.GetPosition().x + 0.01f, camera.GetPosition().y, camera.GetPosition().z);
-		if (Input::GetKeyDown('W'))
-			camera.SetPosition(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z + 0.01f);
-		if (Input::GetKeyDown('S'))
-			camera.SetPosition(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - 0.01f);
+		camera.Update();
 
-		//std::cout << Input::GetMousePos().x << " " << Input::GetMousePos().y << std::endl;
 
 		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
 		draw->Draw();

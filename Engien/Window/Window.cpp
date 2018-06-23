@@ -361,7 +361,7 @@ void Window::_lightPass()
 	LIGHT_BUFFER light_buffer = LIGHT_BUFFER();
 	for (size_t i = 0; i < DX::lights.size(); i++)
 	{
-		light_buffer.info[i] =		XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(),0,0);
+		light_buffer.info[i] =		XMINT4(static_cast<int>(DX::lights.size()), DX::lights[i]->GetInfo(), DX::lights[i]->GetCastShadow(),0);
 		light_buffer.position[i] =	DX::lights[i]->GetPosition();
 		light_buffer.direction[i] = DX::lights[i]->GetDirection();
 		light_buffer.color[i] =		DX::lights[i]->GetColor();

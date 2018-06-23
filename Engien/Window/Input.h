@@ -1,5 +1,6 @@
 #pragma once
 #include "Window.h"
+
 class Input
 {
 	friend class Window;
@@ -8,6 +9,7 @@ private:
 
 	static bool m_mouseKeys[3];
 	static DirectX::XMFLOAT2 m_mousePos;
+	static DirectX::XMFLOAT2 m_preMousePos;
 	static DirectX::XMFLOAT2 m_mouseDelta;
 	static float m_scrollDelta;
 private:
@@ -25,6 +27,7 @@ public:
 	static bool GetRightMouse();
 
 	static DirectX::XMFLOAT2 GetMousePos();
+	static DirectX::XMFLOAT2 GetMousePosDelta();
 	static float GetMouseScroll();
 
 	Input();

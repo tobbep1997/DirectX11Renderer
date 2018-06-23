@@ -1,5 +1,5 @@
 #include "Camera.h"
-
+#include "../Window/Input.h"
 
 
 void Camera::_createViewMatrix()
@@ -28,6 +28,11 @@ Camera::Camera()
 	this->_position = XMFLOAT4A(0, 0, 0, 1);
 	this->_direction = XMFLOAT4A(0, 0, -1, 0);
 	this->_up = XMFLOAT4A(0, 1, 0, 0);
+	this->_forward = XMFLOAT4A(0, 0, 1, 0);
+	this->_speed = 0.01f;
+	this->_rotSpeed = 0.01f;
+	this->_pitch = 0;
+	this->_yaw = 0;
 }
 
 
@@ -67,6 +72,55 @@ void Camera::SetDirection(XMFLOAT4A direction)
 	this->_createViewMatrix();
 	this->_createViewProjectionMatrix();
 
+}
+
+void Camera::Update()
+{
+	XMVECTOR pos = XMLoadFloat4A(&this->_position);
+	XMVECTOR direction = XMLoadFloat4A(&this->_direction);
+	XMVECTOR up = XMLoadFloat4A(&this->_up);
+
+	XMVECTOR right = XMVector3Cross(up, direction);
+	XMVECTOR forward = XMVector3Cross(right, up);
+
+	if (Input::GetKeyDown('A'))
+	{
+		pos -= right * _speed;
+	}
+	if (Input::GetKeyDown('D'))
+	{
+		pos += right * _speed;
+	}
+	if (Input::GetKeyDown('W'))
+	{
+		pos += forward * _speed;
+	}
+	if (Input::GetKeyDown('S'))
+	{
+		pos -= forward * _speed;
+	}
+
+	DirectX::XMFLOAT2 mouseDelta = Input::GetMousePosDelta();
+	
+	_pitch += mouseDelta.y * _rotSpeed;
+	_yaw += mouseDelta.x * _rotSpeed;
+
+	if (_pitch > XM_PI / 2.1f)
+		_pitch = XM_PI / 2.1f;
+
+	if (_pitch < -XM_PI / 2.1f)
+		_pitch = -XM_PI / 2.1f;
+
+	XMMATRIX rotMatrixX = XMMatrixRotationRollPitchYaw(_pitch, _yaw, 0);
+	direction = XMVector3TransformCoord(XMLoadFloat4(&this->_forward), rotMatrixX);
+	direction = XMVector3Normalize(direction);
+	
+
+	XMStoreFloat4A(&this->_direction, direction);
+	XMStoreFloat4A(&this->_position, pos);
+
+	this->_createViewMatrix();
+	this->_createViewProjectionMatrix();
 }
 
 

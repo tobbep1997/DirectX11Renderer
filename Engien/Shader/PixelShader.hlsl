@@ -70,9 +70,12 @@ float4 main(VS_OUTPUT input) : SV_TARGET
     float attenuation = 0;
     float difMult = 0;
 
+    float4 shadowLightPos = float4(0, 0, 0, 0);
+
     for (int i = 0; i < info[0].x; i++)
     {
-
+        if (info[i].z)
+            shadowLightPos = position[i];
 
         if (info[i].y == 0)
         {
@@ -131,8 +134,13 @@ float4 main(VS_OUTPUT input) : SV_TARGET
     if (abs(lightView.y) > 1.0f)							    
         return min(ambient + spec + dif, float4(1, 1, 1, 1));
 
+    float lightToObject = normalize(shadowLightPos - input.worldPos);
+    float margin = acos(saturate(dot(input.normal, lightToObject)));
+    float epsilon = 0.001 / margin;
 
-    float shadowCoeff = (txShadow.Sample(sampState, smTex).r + 0.001 < depth) ? 0.2f : 1.0f; // If the depth from camera is larger than depth from light,
+    epsilon = clamp(epsilon, 0, 0.01);
+
+    float shadowCoeff = (txShadow.Sample(sampState, smTex).r + epsilon< depth) ? 0.2f : 1.0f; // If the depth from camera is larger than depth from light,
 
 
     return min((ambient + spec + dif) * shadowCoeff, float4(1, 1, 1, 1));

@@ -8,12 +8,17 @@ class Camera
 private:
 	XMFLOAT4A		_position;
 	XMFLOAT4A		_direction;
-	XMFLOAT4A		_up;
+	XMFLOAT4A		_up, _forward;
 
 	XMFLOAT4X4A		_viewMatrix;
 	XMFLOAT4X4A		_projectionMatrix;
 	XMFLOAT4X4A		_viewProjectionMatrix;
 
+	float			_speed;
+	float			_rotSpeed;
+
+	float			_pitch;
+	float			_yaw;
 
 protected:
 	void _createViewMatrix();
@@ -31,6 +36,8 @@ public:
 
 	void SetPosition(XMFLOAT4A position);
 	void SetDirection(XMFLOAT4A direction);
+
+	void Update();
 
 	XMFLOAT4X4A GetViewMatrix() const;
 	XMFLOAT4X4A GetProjectionMatrix() const;

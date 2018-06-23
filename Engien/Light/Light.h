@@ -29,6 +29,7 @@ private:
 	XMFLOAT4X4A _projectionMatrix;
 	XMFLOAT4X4A _viewProjectionMatrix;
 	int type;
+	bool castShadow;
 protected:
 	void _createViewMatrix();
 	void _createProjectionMatrix();
@@ -55,5 +56,6 @@ public:
 	XMFLOAT4A GetDirection();
 	XMFLOAT4A GetColor();
 	int	GetInfo();
+	bool GetCastShadow() const;
 };
 

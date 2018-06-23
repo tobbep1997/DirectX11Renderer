@@ -3,6 +3,8 @@
 bool Input::m_keys[256];
 bool Input::m_mouseKeys[3];
 DirectX::XMFLOAT2 Input::m_mousePos;
+DirectX::XMFLOAT2 Input::m_preMousePos;
+
 
 float Input::m_scrollDelta;
 
@@ -49,6 +51,19 @@ bool Input::GetRightMouse()
 DirectX::XMFLOAT2 Input::GetMousePos()
 {
 	return m_mousePos;
+}
+
+DirectX::XMFLOAT2 Input::GetMousePosDelta()
+{
+	DirectX::XMFLOAT2 value;
+	value.x = m_mousePos.x - m_preMousePos.x;
+	value.y = m_mousePos.y - m_preMousePos.y;
+	//if (value.x != 0 || value.y != 0)
+	//{
+	//	std::cout << value.x << " " << value.y << std::endl;
+	//}
+	m_preMousePos = m_mousePos;	
+	return value;
 }
 
 float Input::GetMouseScroll()
