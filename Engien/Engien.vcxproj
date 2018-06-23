@@ -121,6 +121,7 @@
     <ClInclude Include="Graphics\Quad.h" />
     <ClInclude Include="Graphics\Texture\Material.h" />
     <ClInclude Include="Graphics\Texture\WICTextureLoader.h" />
+    <ClInclude Include="Window\Input.h" />
     <ClInclude Include="Light\Light.h" />
     <ClInclude Include="Graphics\Texture\Texture.h" />
     <ClInclude Include="Graphics\Mesh\MeshLoader.h" />
@@ -136,6 +137,7 @@
     <ClCompile Include="Graphics\Quad.cpp" />
     <ClCompile Include="Graphics\Texture\Material.cpp" />
     <ClCompile Include="Graphics\Texture\WICTextureLoader.cpp" />
+    <ClCompile Include="Window\Input.cpp" />
     <ClCompile Include="Light\Light.cpp" />
     <ClCompile Include="Graphics\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Source.cpp" />

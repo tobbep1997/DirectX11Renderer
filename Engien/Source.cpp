@@ -4,6 +4,8 @@
 #include "Light/Light.h"
 #include "Graphics\Mesh\Mesh.h"
 #include "Graphics\Mesh\MeshLoader.h"
+#include "Window\Input.h"
+
 
 #if _DEBUG
 #include <iostream>
@@ -35,20 +37,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	Camera camera;
 	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
-	camera.SetPosition(XMFLOAT4A(0, 2, 0, 1));
+	camera.SetPosition(XMFLOAT4A(0, 2, 5, 1));
 	camera.SetDirection(XMFLOAT4A(0, -.55f, 1, 0));
 	
 	Mesh * draw = new Mesh();
 	Mesh * floor = new Mesh();
+	Mesh * wall = new Mesh();
 	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
 	draw->LoadTexture("Texture/stone2.jpg");
 	draw->LoadNormalMap("Texture/NormalMap2.png");
 	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
-	//floor->LoadNormalMap("Texture/NormalMap.png");
-	//floor->LoadTexture("Texture/stone.jpg");
+	wall->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
+	
 
 	draw->SetPosition(0, 0, 5);
 	floor->SetPosition(0, -2, 5);
+	wall->SetPosition(-10, 0, 5);
+	wall->SetScale(1, 5, 10);
 
 	draw->SetScale(1, 1, 1);
 	floor->SetScale(10, 1, 10);
@@ -64,20 +69,35 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	light->SetDirection(0, -1, 1);
 	light->CastShadow();
 
+	light2->SetLightType(LIGHT_TYPE::spotlight);
 	light2->SetColor(1, 1, 1);
 	light2->SetPosition(-5, 0, 5);
+	light2->SetDirection(0, -1, 0);
+
 	light3->SetColor(1, 1, 1);
 	light3->SetPosition(5, 0, 5);
 
+	
 	while (wnd.isOpen())
-	{
+	{	
 		wnd.PollEvents();
 		wnd.Clear(); 
+	
+		if (Input::GetKeyDown('A'))
+			camera.SetPosition(camera.GetPosition().x - 0.01f, camera.GetPosition().y, camera.GetPosition().z);
+		if (Input::GetKeyDown('D'))
+			camera.SetPosition(camera.GetPosition().x + 0.01f, camera.GetPosition().y, camera.GetPosition().z);
+		if (Input::GetKeyDown('W'))
+			camera.SetPosition(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z + 0.01f);
+		if (Input::GetKeyDown('S'))
+			camera.SetPosition(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z - 0.01f);
 
+		//std::cout << Input::GetMousePos().x << " " << Input::GetMousePos().y << std::endl;
 
 		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
 		draw->Draw();
 		floor->Draw();
+		wall->Draw();
 
 		light->Draw();
 		light2->Draw();
@@ -92,5 +112,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	delete light3;
 	delete draw;
 	delete floor;
+	delete wall;
 	return 0;
 }

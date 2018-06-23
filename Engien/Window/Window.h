@@ -8,6 +8,7 @@
 #include "Structs.h"
 #include "Creator.h"
 #include "../Camera/Camera.h"
+#include "Input.h"
 
 
 using namespace DirectX;

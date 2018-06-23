@@ -1,6 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
+
 using namespace DirectX;
 class Camera
 {
@@ -12,6 +13,7 @@ private:
 	XMFLOAT4X4A		_viewMatrix;
 	XMFLOAT4X4A		_projectionMatrix;
 	XMFLOAT4X4A		_viewProjectionMatrix;
+
 
 protected:
 	void _createViewMatrix();

@@ -85,15 +85,32 @@ float4 main(VS_OUTPUT input) : SV_TARGET
             if (difMult > 0)
                 dif += attenuation * (saturate(l_color[i] * color) * difMult);
 
-            specmult = dot(input.normal, normalize(posToCam.xyz + posToLight.xyz));
-            if (specmult > 0)
-                spec += attenuation * l_color[i] * max(pow(abs(specmult), 32), 0.0);
+            //specmult = dot(input.normal, normalize(posToCam.xyz + posToLight.xyz));
+            //if (specmult > 0)
+                //spec += attenuation * l_color[i] * max(pow(abs(specmult), 32), 0.0);
             
         }
         else if (info[i].y == 1)
         {
+            distanceToLight = length(posToLight);
+            attenuation = 1.0 / (1.0 + 0.01 * pow(distanceToLight, 2));
+
             difMult = max(dot(input.normal, -direction[i].xyz), 0.0);
             if (difMult > 0)
+                dif += (saturate(l_color[i] * color) * difMult);
+
+            specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
+            if (specmult > 0)
+                spec += attenuation * l_color[i] * max(pow(abs(specmult), 32), 0.0);
+        }
+        else if (info[i].y == 2)
+        {
+            posToLight = position[i] - input.worldPos;
+
+            float cone = max(dot(normalize(posToLight), -direction[i]), 0);
+
+            difMult = max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
+            if (difMult > 0 && cone > .5)
                 dif += (saturate(l_color[i] * color) * difMult);
         }
  

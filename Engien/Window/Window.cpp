@@ -537,9 +537,41 @@ LRESULT Window::WndProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		// --------------------------------Subject for change!--------------------------------
 		if (wParam == VK_ESCAPE)
 			PostQuitMessage(0);
-
+		Input::_setKey(static_cast<UINT>(wParam), true);
 		break;
-	
+
+	case WM_KEYUP:
+		Input::_setKey(static_cast<UINT>(wParam), false);
+		break;
+
+	case WM_LBUTTONDOWN:
+		Input::_setMouseKey(0, true);
+		break;
+	case WM_LBUTTONUP:
+		Input::_setMouseKey(0, false);
+		break;
+
+	case WM_MBUTTONDOWN:
+		Input::_setMouseKey(1, true);
+		break;
+	case WM_MBUTTONUP:
+		Input::_setMouseKey(1, false);
+		break;
+
+	case WM_RBUTTONDOWN:
+		Input::_setMouseKey(2, true);
+		break;
+	case WM_RBUTTONUP:
+		Input::_setMouseKey(2, false);
+		break;
+
+	case WM_MOUSEMOVE:
+		Input::_setMousePos(DirectX::XMFLOAT2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+
+	case WM_MOUSEWHEEL:
+		Input::_setScrollDelta(GET_WHEEL_DELTA_WPARAM(wParam) / 120.0f);
+		break;
 	}
 
 	return DefWindowProc(m_hwnd, uMsg, wParam, lParam);

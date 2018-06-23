@@ -69,6 +69,7 @@ void Camera::SetDirection(XMFLOAT4A direction)
 
 }
 
+
 XMFLOAT4X4A Camera::GetViewMatrix() const
 {
 	return this->_viewMatrix;
