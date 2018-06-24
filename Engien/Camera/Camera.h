@@ -15,7 +15,7 @@ private:
 	XMFLOAT4X4A		_viewProjectionMatrix;
 
 	float			_speed;
-	float			_rotSpeed;
+	float			_sense;
 
 	float			_pitch;
 	float			_yaw;
@@ -37,7 +37,10 @@ public:
 	void SetPosition(XMFLOAT4A position);
 	void SetDirection(XMFLOAT4A direction);
 
-	void Update();
+	void Update(float deltaTime = 1.0);
+
+	void SetSpeed(float speed);
+	void SetSense(float sense);
 
 	XMFLOAT4X4A GetViewMatrix() const;
 	XMFLOAT4X4A GetProjectionMatrix() const;

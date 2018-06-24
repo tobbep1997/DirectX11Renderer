@@ -29,8 +29,8 @@ Camera::Camera()
 	this->_direction = XMFLOAT4A(0, 0, -1, 0);
 	this->_up = XMFLOAT4A(0, 1, 0, 0);
 	this->_forward = XMFLOAT4A(0, 0, 1, 0);
-	this->_speed = 0.01f;
-	this->_rotSpeed = 0.01f;
+	this->_speed = 1.f;
+	this->_sense = 1.f;
 	this->_pitch = 0;
 	this->_yaw = 0;
 }
@@ -74,7 +74,7 @@ void Camera::SetDirection(XMFLOAT4A direction)
 
 }
 
-void Camera::Update()
+void Camera::Update(float deltaTime)
 {
 	XMVECTOR pos = XMLoadFloat4A(&this->_position);
 	XMVECTOR direction = XMLoadFloat4A(&this->_direction);
@@ -83,8 +83,8 @@ void Camera::Update()
 
 	DirectX::XMFLOAT2 mouseDelta = Input::GetMousePosDelta();
 	
-	_pitch += mouseDelta.y * _rotSpeed;
-	_yaw += mouseDelta.x * _rotSpeed;
+	_pitch += mouseDelta.y * this->_sense * deltaTime;
+	_yaw += mouseDelta.x * this->_sense * deltaTime;
 
 	if (_pitch > XM_PI / 2.1f)
 		_pitch = XM_PI / 2.1f;
@@ -101,19 +101,19 @@ void Camera::Update()
 	
 	if (Input::GetKeyDown('A'))
 	{
-		pos -= right * _speed;
+		pos -= right * _speed * deltaTime;
 	}
 	if (Input::GetKeyDown('D'))
 	{
-		pos += right * _speed;
+		pos += right * _speed * deltaTime;
 	}
 	if (Input::GetKeyDown('W'))
 	{
-		pos += forward * _speed;
+		pos += forward * _speed * deltaTime;
 	}
 	if (Input::GetKeyDown('S'))
 	{
-		pos -= forward * _speed;
+		pos -= forward * _speed * deltaTime;
 	}
 
 	
@@ -123,6 +123,16 @@ void Camera::Update()
 
 	this->_createViewMatrix();
 	this->_createViewProjectionMatrix();
+}
+
+void Camera::SetSpeed(float speed)
+{
+	this->_speed = speed;
+}
+
+void Camera::SetSense(float sense)
+{
+	this->_sense = sense;
 }
 
 

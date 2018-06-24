@@ -108,8 +108,10 @@ float4 main(VS_OUTPUT input) : SV_TARGET
                 dif += (saturate(l_color[i] * color) * difMult);
 
             specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
-            if (specmult > 0)
+            if (specmult > 0)                       
                 spec += attenuation * specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
+
+            
         }
         else if (info[i].y == 2)
         {

@@ -5,7 +5,7 @@
 #include "Graphics\Mesh\Mesh.h"
 #include "Graphics\Mesh\MeshLoader.h"
 #include "Window\Input.h"
-
+#include <chrono>
 
 #if _DEBUG
 #include <iostream>
@@ -33,13 +33,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	//Start here
 	Window wnd(hInstance);
-	wnd.Init(SCREEN_WIDTH, SCREEN_HIGHT, "Hello world", false);
+	wnd.Init(SCREEN_WIDTH, SCREEN_HIGHT, "This is the window", false);
 
 	Camera camera;
 	camera.Init(XM_PI / 2, static_cast<float>(SCREEN_WIDTH) / SCREEN_HIGHT);
 	camera.SetPosition(XMFLOAT4A(0, 2, 5, 1));
 	camera.SetDirection(XMFLOAT4A(1, 0, 0, 0));
+	camera.SetSense(15.f);
+	camera.SetSpeed(5.0f);
 	
+	std::chrono::high_resolution_clock clock;	
 
 	Mesh * draw = new Mesh();
 	Mesh * floor = new Mesh();
@@ -51,7 +54,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
 	floor->LoadTexture("Texture/Brick.png");
-	//floor->LoadNormalMap("Texture/NormalMap2.png");
+	floor->LoadNormalMap("Texture/BrickNormal.png");
 	floor->LoadSpecularHighlightMap("Texture/BrickSpec.png");
 
 	draw->SetPosition(0, 0, 5);
@@ -69,21 +72,27 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	light->SetDirection(0, -1, 1);
 	light->CastShadow();
 	
+	__int64 post = 0;
+	__int64 pre = 0;
+
+	float timer = 0;
 	while (wnd.isOpen())
 	{	
 		wnd.PollEvents();
 		wnd.Clear(); 
-	
-		camera.Update();
+		post = clock.now().time_since_epoch().count() - pre;
+		float delta = static_cast<float>(post) / 1000000000.0f;
+		timer += delta;
+		
+		camera.Update(delta);
 
-
-		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
+		draw->SetRotation(0, draw->GetRotation().y + .1f * delta * 2 * XM_PI, 0);		
 		draw->Draw();
 		floor->Draw();
 
 		light->Draw();
 		
-		
+		pre = clock.now().time_since_epoch().count();
 		wnd.Flush(&camera);
 	}
 
