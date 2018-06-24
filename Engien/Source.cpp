@@ -50,9 +50,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	draw->LoadSpecularHighlightMap("Texture/SpecularMap2.png");
 
 	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
-	floor->LoadTexture("Texture/stone2.jpg");
-	floor->LoadNormalMap("Texture/NormalMap2.png");
-	floor->LoadSpecularHighlightMap("Texture/SpecularMap2.png");
+	floor->LoadTexture("Texture/Brick.png");
+	//floor->LoadNormalMap("Texture/NormalMap2.png");
+	floor->LoadSpecularHighlightMap("Texture/BrickSpec.png");
 
 	draw->SetPosition(0, 0, 5);
 	floor->SetPosition(0, -2, 5);
