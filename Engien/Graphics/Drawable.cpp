@@ -102,6 +102,12 @@ void Drawable::SetPosition(float x, float y, float z, float w)
 void Drawable::SetRotation(DirectX::XMFLOAT4A r)
 {
 	this->_rotation = r;
+	if (this->_rotation.x > XM_PI * 2)
+		this->_rotation.x = 0;
+	if (this->_rotation.y > XM_PI * 2)
+		this->_rotation.y = 0;
+	if (this->_rotation.z > XM_PI * 2)
+		this->_rotation.z = 0;
 	this->_buildMatrix();
 }
 

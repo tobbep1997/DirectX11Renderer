@@ -93,23 +93,16 @@ float4 main(VS_OUTPUT input) : SV_TARGET
             difMult = max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
             if (difMult > 0)
                 dif += attenuation * (saturate(l_color[i] * color) * difMult);            
-
-            specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
-            if (specmult > 0)
-                spec += attenuation * specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
         }
         else if (info[i].y == 1)
         {
-            distanceToLight = length(posToLight);
-            attenuation = 1.0 / (1.0 + 0.01 * pow(distanceToLight, 2));
-
             difMult = max(dot(input.normal, -direction[i].xyz), 0.0);
             if (difMult > 0)
                 dif += (saturate(l_color[i] * color) * difMult);
 
             specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
             if (specmult > 0)                       
-                spec += attenuation * specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
+                spec += specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
 
             
         }
@@ -117,11 +110,14 @@ float4 main(VS_OUTPUT input) : SV_TARGET
         {
             posToLight = position[i] - input.worldPos;
 
+            distanceToLight = length(posToLight);
+            attenuation = 1.0 / (1.0 + 0.01 * pow(distanceToLight, 2));
+
             float cone = max(dot(normalize(posToLight), -direction[i]), 0);
 
             difMult = max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
             if (difMult > 0 && cone > .5)
-                dif += (saturate(l_color[i] * color) * difMult);
+                dif += attenuation * (saturate(l_color[i] * color) * difMult);
         }
  
     }
@@ -154,15 +150,15 @@ float4 main(VS_OUTPUT input) : SV_TARGET
     float texelSize = 1.0f / width;
     float shadowCoeff = 1;
 
-    for (int x = -1; x <= 1; ++x)
+    for (int x = -3; x <= 3; ++x)
     {
-        for (int y = -1; y <= 1; ++y)
+        for (int y = -3; y <= 3; ++y)
         {
             shadowCoeff += txShadow.SampleCmpLevelZero(sampAniPoint, smTex + (float2(x, y) * texelSize), depth - epsilon).r;
         }
     }
-    shadowCoeff /= 9.0f;
-    shadowCoeff = min(max(shadowCoeff, 0.0), 1.0f);
+    shadowCoeff /= 49.0f;
+    shadowCoeff = min(max(shadowCoeff, 0.2), 1.0f);
 
     return min((ambient + (spec * pow(shadowCoeff, 2)) + dif) * shadowCoeff, float4(1, 1, 1, 1));
 }

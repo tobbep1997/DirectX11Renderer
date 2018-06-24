@@ -75,25 +75,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	__int64 post = 0;
 	__int64 pre = 0;
 
-	float timer = 0;
+	
 	while (wnd.isOpen())
 	{	
 		wnd.PollEvents();
 		wnd.Clear(); 
-		post = clock.now().time_since_epoch().count() - pre;
-		float delta = static_cast<float>(post) / 1000000000.0f;
-		timer += delta;
-		
+		post = clock.now().time_since_epoch().count();
+		float delta = static_cast<float>(post - pre) / 1000000000.0f;
+	
 		camera.Update(delta);
 
-		draw->SetRotation(0, draw->GetRotation().y + .1f * delta * 2 * XM_PI, 0);		
+		draw->SetRotation(0, draw->GetRotation().y + (.1f * XM_PI * 2 * delta), 0);		
 		draw->Draw();
 		floor->Draw();
 
 		light->Draw();
 		
-		pre = clock.now().time_since_epoch().count();
 		wnd.Flush(&camera);
+		pre = post;
 	}
 
 	delete light;
