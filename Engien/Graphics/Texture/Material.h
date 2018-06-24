@@ -13,11 +13,14 @@ private:
 	std::wstring Kd_map;
 	Texture * _texture;
 	Texture * _normalMap;
+	Texture * _specularHighlightMap;
 
 private:
 	void _loadMTL(const std::wstring & path, const std::wstring & matName);
 	void _loadTexture(const std::wstring & path);
 	void _loadNormalMap(const std::wstring & path);
+	void _loadSpecularHighlightMap(const std::wstring & path = L"");
+
 
 	std::wstring getName(const std::wstring & path);
 	std::wstring getPath(const std::wstring & path);
@@ -28,9 +31,11 @@ public:
 	void LoadMTL(const std::wstring & path = L"", const std::wstring & matName = L"");
 	void LoadTexture(const std::wstring & path = L"");
 	void LoadNormalMap(const std::wstring & path = L"");
+	void LoadSpecularHighlightMap(const std::wstring & path = L"");
 
 	Texture * GetTexture() const;
 	Texture * GetNormalMap() const;
+	Texture * GetSpecularHighlightMap() const;
 
 	std::wstring GetMaterialName();
 	std::wstring GetTextureName();

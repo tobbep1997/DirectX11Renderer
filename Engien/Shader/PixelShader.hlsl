@@ -1,7 +1,10 @@
 SamplerState sampState : register(s0);
+SamplerComparisonState sampAniPoint : register(s1);
+
 Texture2D txDiffuse : register(t0);
 Texture2D txNormal : register(t1);
-Texture2D txShadow : register(t2);
+Texture2D txSpecular : register(t2);
+Texture2D txShadow : register(t3);
 
 cbuffer LIGHT_BUFFER : register(b0)
 {
@@ -25,7 +28,7 @@ cbuffer TEX_INFO : register(b3)
 {
     bool useTex;
     bool useNormal;
-    bool pad0;
+    bool specMap;
     bool pad1;
 }
 
@@ -58,8 +61,11 @@ float4 main(VS_OUTPUT input) : SV_TARGET
 
         input.normal = normalize(mul(n, texSpace));
     }
-    
-    
+    float specMapTex = 1;
+    if (specMap)
+    {
+        specMapTex = txSpecular.Sample(sampState, input.texCoord).r;
+    }
 
     float4 posToCam = cameraPosition - input.worldPos;
     float4 posToLight = float4(0, 0, 0, 0);
@@ -86,12 +92,11 @@ float4 main(VS_OUTPUT input) : SV_TARGET
 
             difMult = max(dot(input.normal, normalize(posToLight.xyz)), 0.0);
             if (difMult > 0)
-                dif += attenuation * (saturate(l_color[i] * color) * difMult);
+                dif += attenuation * (saturate(l_color[i] * color) * difMult);            
 
-            //specmult = dot(input.normal, normalize(posToCam.xyz + posToLight.xyz));
-            //if (specmult > 0)
-                //spec += attenuation * l_color[i] * max(pow(abs(specmult), 32), 0.0);
-            
+            specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
+            if (specmult > 0)
+                spec += attenuation * specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
         }
         else if (info[i].y == 1)
         {
@@ -104,7 +109,7 @@ float4 main(VS_OUTPUT input) : SV_TARGET
 
             specmult = dot(input.normal, normalize(posToCam.xyz - direction[i].xyz));
             if (specmult > 0)
-                spec += attenuation * l_color[i] * max(pow(abs(specmult), 32), 0.0);
+                spec += attenuation * specMapTex * l_color[i] * max(pow(abs(specmult), 512), 0.0);
         }
         else if (info[i].y == 2)
         {
@@ -128,20 +133,34 @@ float4 main(VS_OUTPUT input) : SV_TARGET
 	
     float depth = lightView.z / lightView.w;
     
-    if (abs(lightView.x) > 1.0f)							    
+
+    
+    if (abs(lightView.x) > 1.0f || depth <= 0)							    
         return min(ambient + spec + dif, float4(1, 1, 1, 1));
         
-    if (abs(lightView.y) > 1.0f)							    
+    if (abs(lightView.y) > 1.0f || depth <= 0)							    
         return min(ambient + spec + dif, float4(1, 1, 1, 1));
 
-    float lightToObject = normalize(shadowLightPos - input.worldPos);
-    float margin = acos(saturate(dot(input.normal, lightToObject)));
-    float epsilon = 0.001 / margin;
+    float3 lightToObject = normalize(shadowLightPos - input.worldPos).xyz;
+    float angle = acos(saturate(dot(input.normal, lightToObject)));
+    float epsilon = 0.001 / angle;
 
-    epsilon = clamp(epsilon, 0, 0.01);
+    epsilon = clamp(epsilon, 0, 0.1);
 
-    float shadowCoeff = (txShadow.Sample(sampState, smTex).r + epsilon< depth) ? 0.2f : 1.0f; // If the depth from camera is larger than depth from light,
+    float width;
+    txShadow.GetDimensions(width, width);
+    float texelSize = 1.0f / width;
+    float shadowCoeff = 1;
 
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            shadowCoeff += txShadow.SampleCmpLevelZero(sampAniPoint, smTex + (float2(x, y) * texelSize), depth - epsilon).r;
+        }
+    }
+    shadowCoeff /= 9.0f;
+    shadowCoeff = min(max(shadowCoeff, 0.0), 1.0f);
 
-    return min((ambient + spec + dif) * shadowCoeff, float4(1, 1, 1, 1));
+    return min((ambient + (spec * pow(shadowCoeff, 2)) + dif) * shadowCoeff, float4(1, 1, 1, 1));
 }

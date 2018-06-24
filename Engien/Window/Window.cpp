@@ -251,6 +251,10 @@ void Window::_geometryPass(Camera * camera)
 	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DX::g_deviceContext->IASetInputLayout(m_inputLayout);
 	DX::g_deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
+	DX::g_deviceContext->HSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->DSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->GSSetShader(nullptr, nullptr, 0);
+	DX::g_deviceContext->PSSetShader(nullptr, nullptr, 0);
 	DX::g_deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
 	DX::g_deviceContext->RSSetViewports(1, &m_viewport);
 	DX::g_deviceContext->OMSetRenderTargets(1, &m_backBufferRTV, m_depthStencilView);
@@ -271,11 +275,11 @@ void Window::_geometryPass(Camera * camera)
 		V_Buffer.viewProjection = DirectX::XMFLOAT4X4A();
 	}
 	
-	DX::g_deviceContext->PSSetShaderResources(2, 1, &m_shadowShaderResourceView);
+	DX::g_deviceContext->PSSetShaderResources(3, 1, &m_shadowShaderResourceView);
+	DX::g_deviceContext->PSSetSamplers(1, 1, &m_shadowSamplerState);
 
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	TEX_INFO texInfo;
-	texInfo.pad1 = false;
 	texInfo.pad2 = false;
 
 	for (size_t i = 0; i < DX::geometry.size(); i++)
@@ -284,8 +288,8 @@ void Window::_geometryPass(Camera * camera)
 
 		for (size_t j = 0; j < DX::geometry[i]->getObjectSize(); j++)
 		{
-			texInfo.pad1 = FALSE;
 			texInfo.pad2 = FALSE;
+			texInfo.specMap = FALSE;
 			texInfo.texture = FALSE;
 			texInfo.normal = FALSE;
 
@@ -319,6 +323,13 @@ void Window::_geometryPass(Camera * camera)
 					DX::g_deviceContext->PSSetShaderResources(1, 1, &srv);
 					texInfo.normal = TRUE;
 				}
+				if (DX::geometry[i]->GetMaterial()[j]->GetSpecularHighlightMap())
+				{
+					srv = DX::geometry[i]->GetMaterial()[j]->GetSpecularHighlightMap()->GetShaderResourceView();
+
+					DX::g_deviceContext->PSSetShaderResources(2, 1, &srv);
+					texInfo.specMap = TRUE;
+				}
 			}
 			else
 			{
@@ -340,6 +351,13 @@ void Window::_geometryPass(Camera * camera)
 					DX::g_deviceContext->PSSetShaderResources(1, 1, &srv);
 					texInfo.normal = TRUE;
 
+				}
+				if (DX::geometry[i]->GetMaterial()[0]->GetSpecularHighlightMap())
+				{
+					srv = DX::geometry[i]->GetMaterial()[0]->GetSpecularHighlightMap()->GetShaderResourceView();
+
+					DX::g_deviceContext->PSSetShaderResources(2, 1, &srv);
+					texInfo.specMap = TRUE;
 				}
 			}
 
@@ -422,6 +440,24 @@ void Window::_loadShadow()
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
 	hr = DX::g_device->CreateShaderResourceView(m_shadowDepthBufferTex, &srvDesc, &m_shadowShaderResourceView);
+
+	D3D11_SAMPLER_DESC samplerDescPoint;
+	samplerDescPoint.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDescPoint.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDescPoint.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDescPoint.BorderColor[0] = 1.0f;
+	samplerDescPoint.BorderColor[1] = 1.0f;
+	samplerDescPoint.BorderColor[2] = 1.0f;
+	samplerDescPoint.BorderColor[3] = 1.0f;
+	samplerDescPoint.MinLOD = 0.f;
+	samplerDescPoint.MaxLOD = D3D11_FLOAT32_MAX;
+	samplerDescPoint.MipLODBias = 0.f;
+	samplerDescPoint.MaxAnisotropy = 0;
+	samplerDescPoint.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	samplerDescPoint.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+
+	hr = DX::g_device->CreateSamplerState(&samplerDescPoint, &m_shadowSamplerState);
+
 }
 
 void Window::_shadowPass()

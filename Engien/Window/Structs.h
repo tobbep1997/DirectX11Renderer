@@ -51,6 +51,6 @@ struct TEX_INFO
 {
 	BOOL texture;
 	BOOL normal;
-	BOOL pad1;
+	BOOL specMap;
 	BOOL pad2;
 };

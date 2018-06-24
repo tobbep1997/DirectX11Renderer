@@ -80,9 +80,25 @@ void Camera::Update()
 	XMVECTOR direction = XMLoadFloat4A(&this->_direction);
 	XMVECTOR up = XMLoadFloat4A(&this->_up);
 
-	XMVECTOR right = XMVector3Cross(up, direction);
-	XMVECTOR forward = XMVector3Cross(right, up);
 
+	DirectX::XMFLOAT2 mouseDelta = Input::GetMousePosDelta();
+	
+	_pitch += mouseDelta.y * _rotSpeed;
+	_yaw += mouseDelta.x * _rotSpeed;
+
+	if (_pitch > XM_PI / 2.1f)
+		_pitch = XM_PI / 2.1f;
+
+	if (_pitch < -XM_PI / 2.1f)
+		_pitch = -XM_PI / 2.1f;
+
+	XMMATRIX rotMatrixX = XMMatrixRotationRollPitchYaw(_pitch, _yaw, 0);
+	direction = XMVector3TransformCoord(XMLoadFloat4(&this->_forward), rotMatrixX);
+	direction = XMVector3Normalize(direction);
+
+	XMVECTOR right = XMVector3Normalize(XMVector3Cross(up, direction));
+	XMVECTOR forward = XMVector3Normalize(XMVector3Cross(right, up));
+	
 	if (Input::GetKeyDown('A'))
 	{
 		pos -= right * _speed;
@@ -100,20 +116,6 @@ void Camera::Update()
 		pos -= forward * _speed;
 	}
 
-	DirectX::XMFLOAT2 mouseDelta = Input::GetMousePosDelta();
-	
-	_pitch += mouseDelta.y * _rotSpeed;
-	_yaw += mouseDelta.x * _rotSpeed;
-
-	if (_pitch > XM_PI / 2.1f)
-		_pitch = XM_PI / 2.1f;
-
-	if (_pitch < -XM_PI / 2.1f)
-		_pitch = -XM_PI / 2.1f;
-
-	XMMATRIX rotMatrixX = XMMatrixRotationRollPitchYaw(_pitch, _yaw, 0);
-	direction = XMVector3TransformCoord(XMLoadFloat4(&this->_forward), rotMatrixX);
-	direction = XMVector3Normalize(direction);
 	
 
 	XMStoreFloat4A(&this->_direction, direction);

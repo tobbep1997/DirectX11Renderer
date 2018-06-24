@@ -43,41 +43,31 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	Mesh * draw = new Mesh();
 	Mesh * floor = new Mesh();
-	Mesh * wall = new Mesh();
+
 	draw->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
 	draw->LoadTexture("Texture/stone2.jpg");
 	draw->LoadNormalMap("Texture/NormalMap2.png");
-	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
-	wall->SetMeshes(MeshLoader::LoadMesh("Mesh/Tex.obj"));
-	
+	draw->LoadSpecularHighlightMap("Texture/SpecularMap2.png");
+
+	floor->SetMeshes(MeshLoader::LoadMesh("Mesh/Quad.obj"));
+	floor->LoadTexture("Texture/stone2.jpg");
+	floor->LoadNormalMap("Texture/NormalMap2.png");
+	floor->LoadSpecularHighlightMap("Texture/SpecularMap2.png");
 
 	draw->SetPosition(0, 0, 5);
 	floor->SetPosition(0, -2, 5);
-	wall->SetPosition(-10, 0, 5);
-	wall->SetScale(1, 5, 10);
 
 	draw->SetScale(1, 1, 1);
-	floor->SetScale(10, 1, 10);
+	floor->SetScale(5, 1, 5);
 
 
 
 	Light * light = new Light();
-	Light * light2 = new Light();
-	Light * light3 = new Light();
 	light->SetLightType(LIGHT_TYPE::directional);
 	light->SetColor(1, 1, 1);
 	light->SetPosition(0, 5, 0);
 	light->SetDirection(0, -1, 1);
 	light->CastShadow();
-
-	light2->SetLightType(LIGHT_TYPE::spotlight);
-	light2->SetColor(1, 1, 1);
-	light2->SetPosition(-5, 0, 5);
-	light2->SetDirection(0, -1, 0);
-
-	light3->SetColor(1, 1, 1);
-	light3->SetPosition(5, 0, 5);
-
 	
 	while (wnd.isOpen())
 	{	
@@ -90,21 +80,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		draw->SetRotation(0, draw->GetRotation().y + .001f, 0);
 		draw->Draw();
 		floor->Draw();
-		wall->Draw();
 
 		light->Draw();
-		light2->Draw();
-		light3->Draw();
 		
 		
 		wnd.Flush(&camera);
 	}
 
 	delete light;
-	delete light2;
-	delete light3;
 	delete draw;
 	delete floor;
-	delete wall;
 	return 0;
 }

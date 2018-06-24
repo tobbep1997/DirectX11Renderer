@@ -44,6 +44,7 @@ public:
 
 	void LoadTexture(const std::string& path);
 	void LoadNormalMap(const std::string& path);
+	void LoadSpecularHighlightMap(const std::string& path);
 
 	std::vector<ID3D11Buffer *>	getVertexBuffer();
 	std::vector<Material *>		GetMaterial();

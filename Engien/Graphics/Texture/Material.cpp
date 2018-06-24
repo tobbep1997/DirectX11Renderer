@@ -60,8 +60,18 @@ void Material::_loadTexture(const std::wstring & path)
 
 void Material::_loadNormalMap(const std::wstring & path)
 {
+	if (path == L"")
+		return;
 	this->_normalMap = new Texture();
 	this->_normalMap->LoadTexture(std::string(path.begin(), path.end()));
+}
+
+void Material::_loadSpecularHighlightMap(const std::wstring & path)
+{
+	if (path == L"")
+		return;
+	this->_specularHighlightMap = new Texture();
+	this->_specularHighlightMap->LoadTexture(std::string(path.begin(), path.end()));
 }
 
 std::wstring Material::getName(const std::wstring & path)
@@ -87,6 +97,7 @@ Material::~Material()
 {
 	delete this->_texture;
 	delete this->_normalMap;
+	delete this->_specularHighlightMap;
 }
 
 void Material::LoadMTL(const std::wstring & path, const std::wstring & matName)
@@ -104,6 +115,11 @@ void Material::LoadNormalMap(const std::wstring & path)
 	this->_loadNormalMap(path);
 }
 
+void Material::LoadSpecularHighlightMap(const std::wstring & path)
+{
+	this->_loadSpecularHighlightMap(path);
+}
+
 Texture * Material::GetTexture() const
 {
 	return this->_texture;
@@ -112,6 +128,11 @@ Texture * Material::GetTexture() const
 Texture * Material::GetNormalMap() const
 {
 	return this->_normalMap;
+}
+
+Texture * Material::GetSpecularHighlightMap() const
+{
+	return this->_specularHighlightMap;
 }
 
 std::wstring Material::GetMaterialName()

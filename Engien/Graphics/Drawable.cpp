@@ -148,6 +148,14 @@ void Drawable::LoadNormalMap(const std::string & path)
 	}
 }
 
+void Drawable::LoadSpecularHighlightMap(const std::string & path)
+{
+	for (size_t i = 0; i < this->_material.size(); i++)
+	{
+		this->_material[i]->LoadSpecularHighlightMap(std::wstring(path.begin(), path.end()));
+	}
+}
+
 std::vector<ID3D11Buffer *> Drawable::getVertexBuffer()
 {
 	return this->_vertexBuffer;
